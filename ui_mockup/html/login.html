@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Home ui</title>
+    <link rel="stylesheet" href="/ui_mockup/css/login.css">
+</head>
+
+<body>
+    <div id='login_main'>
+        <h1 id='login_heading'>Social App</h1>
+        <h5>Login</h5>
+        <form id='login_form' action="/user/login" method="POST">
+            <input id='uid' type="text" name="uid" placeholder=" Username or Email" />
+            <input id='password' type="password" name="password" placeholder=" Password" />
+            <button id='submit_btn' type="submit"> Log in </button>
+        </form>
+        <a id='passwd_reset' href="/user/reset_password">Reset Password</a>
+        <span id='register'>New user? <a href="/user/regisgter">Click here to register</a></span>
+    </div>
+</body>
+
+</html>

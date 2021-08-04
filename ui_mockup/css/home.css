@@ -1,0 +1,87 @@
+* {
+    padding: 0%;
+    margin: 0%;
+}
+
+body {
+    background-color: #fafafa;
+}
+
+#nav_parent {
+    position: fixed;
+    top: 0;
+    left: 0;
+    margin: auto;
+    width: 100%;
+}
+
+#nav_bar {
+    background-color: white;
+    display: flex;
+    flex-direction: row;
+    justify-content: space-around;
+    align-items: center;
+    height: 10vh;
+    border-bottom: 1px solid #dbdbdb;
+}
+
+#nav_link {
+    display: flex;
+    list-style: none;
+    justify-content: space-between;
+    width: 11%;
+}
+
+#search_bar {
+    display: flex;
+}
+
+#search_inp {
+    height: 30px;
+    border-radius: 4px;
+    border: 1px solid #dbdbdb;
+    background-color: #fafafa;
+}
+
+#search_inp::placeholder {
+    text-align: center;
+}
+
+#search_img {
+    width: 18px;
+    height: 18px;
+}
+
+#search_btn {
+    margin-left: 5px;
+}
+
+#title {
+    font-weight: bold;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    font-size: 20px;
+}
+
+#feed {
+    margin-top: 6%;
+}
+
+.dp_small {
+    width: 30px;
+    height: 30px;
+}
+
+
+.post {
+    background-color: #ffffff;
+    border: 1px solid #dbdbdb;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.post_head {
+    display: flex;
+    justify-content: left;
+}
+

@@ -1,22 +1,15 @@
 import React from "react";
+import Search from "./search";
+import Nav from "./nav";
 
 export default class Header extends React.Component {
     render() {
         return (
-            <div style={{backgroundColor: "grey"}}>
-                <nav>
-                    <h4>SOCIAL APP</h4>
-                    <form>
-                        <input type="text" />
-                        <button type="submit">\</button>
-                    </form>
-                    <ul>
-                        <li><button>HOME</button></li>
-                        <li><button>profile</button></li>
-                        <li><button>logout</button></li>
-                    </ul>
-                </nav>
-            </div>
+            <header style={{ border: "1px solid black" }}>
+                <h4>Social App</h4>
+                <Search />
+                <Nav />
+            </header>
         );
     }
 }

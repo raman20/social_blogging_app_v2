@@ -7,10 +7,10 @@ class App extends React.Component {
       authId: null,
       currentComponent: null,
       components: {
-        'Login': <Login setCurrentComponent={this.setCurrentComponent} setAuth={this.setAuth} />,
+        'Login': <Login setCurrentComponent={this.setCurrentComponent} setAuth={this.setAuth} authId={this.getAuth} />,
         'Register': <Register setCurrentComponent={this.setCurrentComponent} />,
         'PasswordReset': <PasswordReset setCurrentComponent={this.setCurrentComponent} />,
-        'Home': <Home setCurrentComponent={this.setCurrentComponent} />
+        'Home': <Home setCurrentComponent={this.setCurrentComponent} authId={this.getAuth} />
       }
     };
   }
@@ -20,13 +20,35 @@ class App extends React.Component {
     else this.setState({ currentComponent: this.state.components[componentName] });
   }
 
-  setAuth = (userId, uname) => {
-    this.setState({ authId: userId, authName: uname });
+  getAuth = () => {
+    return this.state.authId;
+  }
+
+  setAuth = (userId) => {
+    this.setState({ authId: userId });
+    if (userId !== null) {
+      this.setState({ currentComponent: this.state.Home })
+    }
+  }
+
+  setHeader = () => {
+    if (this.state.authId) {
+      return <Header authId={this.state.authId} />
+    }
+  }
+
+  currentComponent = () => {
+    if (this.state.authId) {
+      return this.state.currentComponent;
+    }
+
+    return <Login setCurrentComponent={this.setCurrentComponent} authId={this.state.authId} />
   }
 
   render() {
     return (
       <div className="App">
+        {this.setHeader()}
         {this.state.currentComponent}
       </div>
     )
@@ -66,7 +88,7 @@ class Header extends React.Component {
         .then(res => {
           if (res.result === 'sys_error') alert('server error!!!');
           else if (res.result === "not_found") alert('User not exists!!!');
-          else this.props.setCurrentComponent('', <User setCurrentComponent={this.props.setCurrentComponent} id={res.id} />)
+          else this.props.setCurrentComponent('', <User setCurrentComponent={this.props.setCurrentComponent} id={res.id} authId={this.props.authId} />)
         })
     }
   }
@@ -76,8 +98,9 @@ class Header extends React.Component {
   }
 
   redirectToProfile = () => {
-    this.props.setCurrentComponent('Profile');
+    this.props.setCurrentComponent('', <User id={this.props.authId} />);
   }
+
   logout = () => {
     this.props.setAuth(null);
   }
@@ -129,10 +152,10 @@ class Register extends React.Component {
   handleSubmit = (event) => {
     event.preventDefault();
     if (this.state.password === this.state.password2) {
-      fetch('www.test.com', {
+      fetch('/user/register', {
         method: "POST",
         headers: {
-          "Accept": "applicatio/json",
+          "Accept": "application/json",
           "Content-type": "application/json"
         },
         body: JSON.stringify({
@@ -140,16 +163,16 @@ class Register extends React.Component {
           passwd: this.state.password,
         })
       }).then(res => res.text()).then((res) => {
-        if (res === "sys_error") {
+        if (res.result === "sys_error") {
           alert('please try again:- SERVER ERROR');
         }
-        else if (res === "success") {
+        else if (res.result === "success") {
           alert('Registered Successfully please login now');
         }
       })
     }
     else {
-      alert('Please Check your password!!');
+      alert('password is not matching, Please Check your password!!');
     }
   }
 
@@ -197,7 +220,7 @@ class Login extends React.Component {
   handleSubmit = (e) => {
     e.preventDefault();
 
-    fetch('test.com', {
+    fetch('/user/login', {
       method: "POST",
       headers: {
         "Accept": "application/json",
@@ -208,7 +231,9 @@ class Login extends React.Component {
         passwd: this.state.password
       })
     }).then(res => res.json()).then(res => {
-      if (res.result === 'success') this.props.setAuth(res.userId, res.uname);
+      if (res.result === 'success') {
+        this.props.setAuth(res.userId);
+      }
       else if (res.result === "sys_error") alert('please try again:- SERVER ERROR');
       else alert("Please Check Your User Name or Password");
     })
@@ -254,8 +279,8 @@ class PasswordReset extends React.Component {
   handleSubmit = (e) => {
     e.preventDefault();
     if (this.state.password === this.state.password2) {
-      fetch('www.test.com', {
-        method: "POST",
+      fetch('/password_reset', {
+        method: "PUT",
         headers: {
           "Accept": "application/json",
           "Content-Type": "application/json"
@@ -299,7 +324,7 @@ class Home extends React.Component {
   }
 
   fetchFeed = () => {
-    fetch('test.com', {
+    fetch(`/feed/${this.state.limit}`, {
       method: "GET",
       headers: {
         "Accept": "application/json",
@@ -309,12 +334,12 @@ class Home extends React.Component {
       .then(res => { res.json() })
       .then(res => {
         if (res.result === "sys_error") {
-          alert('Server Erro!!!');
+          alert('Server Error!!!');
           this.fetchFeed();
         }
 
         else {
-          let newFeedItems = res.map((res_data, index) => <FeedPost key={index} feedData={res_data} />)
+          let newFeedItems = res.map((res_data, index) => <FeedPost key={index} feedData={res_data} authId={this.props.getAuth()} />)
           this.setState((prevState, prevProps) => {
             return { feed: prevState.feed.concat(newFeedItems) }
           })
@@ -330,7 +355,6 @@ class Home extends React.Component {
   render() {
     return (
       <>
-        <Header />
         <div>
           {this.state.feed}
           <button onClick={this.loadMoreFeed}>more</button>
@@ -356,11 +380,11 @@ class FeedPost extends React.Component {
   }
 
   redirectToPost = () => {
-    this.props.setCurrentComponent('', <MainPost setCurrentComponent={this.props.setCurrentComponent} postData={this.props.feedData} likes={this.state.likes} />);
+    this.props.setCurrentComponent('', <MainPost setCurrentComponent={this.props.setCurrentComponent} postData={this.props.feedData} authId={this.props.authId} likes={this.state.likes} />);
   }
 
   redirectToUser = () => {
-    this.props.setCurrentComponent('', <User setCurrentComponent={this.props.setCurrentComponent} id={this.props.feedData.id} />)
+    this.props.setCurrentComponent('', <User setCurrentComponent={this.props.setCurrentComponent} id={this.props.feedData.id} authId={this.props.authId} />)
   }
 
   handleLike = () => {
@@ -414,7 +438,7 @@ class FeedPost extends React.Component {
       <div id={this.props.feedData.pid} className="fp" style={{ border: "1px solid black" }}>
         <div className="fp_header">
           <div className="fp_header_user_meta" onClick={this.redirectToUser}>
-            <img className="fp_userDp" src={this.props.feedData.dp} alt="user profile" />
+            <img style={{ width: "20%", height: "20%" }} className="fp_userDp" src={this.props.feedData.dp} alt="user profile" />
             <b className="fp_uname">{this.props.feedData.uname}</b>
           </div>
         </div>
@@ -446,7 +470,7 @@ class MainPost extends React.Component {
   }
 
   redirectToUser = () => {
-    this.props.setCurrentComponent('', <User setCurrentComponent={this.props.setCurrentComponent} id={this.props.postData.id} />)
+    this.props.setCurrentComponent('', <User setCurrentComponent={this.props.setCurrentComponent} id={this.props.postData.id} authId={this.props.authId} />)
   }
 
   handleLike = () => {
@@ -517,15 +541,38 @@ class MainPost extends React.Component {
     else alert('Please write any comment');
   }
 
+  editPost = () => {
+    if (this.props.authId === this.props.postData.id) {
+      this.setCurrentComponent('', <PostEdit postData={this.props.postData} />)
+    }
+  }
+  deletePost = () => {
+    if (this.props.authId === this.props.postData.id) {
+      fetch(`post/delete/${this.props.postData.pid}`, {
+        method: "DELETE",
+        headers: {
+          "Accept": "application/json",
+          "Content-Type": "application/json"
+        }
+      }).this(res => res.json()).this(res => {
+        if (res.result === 'sys_error') alert('server error');
+        else this.props.setCurrentComponent('Home');
+      })
+    }
+  }
+
+  postControl = this.props.authId === this.props.postData.id ? <><u onClick={this.editPost}>Edit</u> <u onClick={this.deletePost}>Delete</u></> : null
+
   render() {
     return (
       <>
-        <Header />
         <div className="post">
           <div className="post_header">
             <div onClick={this.redirectToUser}>
-              <img src={this.props.postData.dp} alt="user profile" />
-              <b>{this.props.postData.uname}</b></div>
+              <img style={{ width: "20%", height: "20%" }} src={this.props.postData.dp} alt="user profile" />
+              <b>{this.props.postData.uname}</b>
+            </div>
+            {this.postControl}
           </div>
           <div className="post_body">
             <div className="post_media">
@@ -570,37 +617,102 @@ class User extends React.Component {
     super(props);
     this.state = {
       userData: {},
-      posts: [],
       followers: [],
-      followings: []
+      followings: [],
+      followFlag: 'follow'
     };
   }
-  fetchUserData = () => { }
+  fetchUserData = () => {
+    fetch(`/user/${this.props.id}`, {
+      method: 'GET',
+      headers: {
+        "Accept": "application/json"
+      }
+    })
+      .this(res => res.json())
+      .this(res => {
+        if (res.result === 'sys_error') alert('Server Error!!!');
+        else this.setState({ userData: res });
+      })
+  }
 
-  fetchPosts = () => { }
+  fetchFollowers = () => {
+    fetch(`/user/${this.props.id}/followers`, {
+      method: "GET",
+      headers: {
+        "Accept": "application/json"
+      }
+    })
+      .this(res => res.json())
+      .this(res => {
+        if (res.result === 'sys_error') alert('server error!!!');
+        else this.setState({ followers: res });
+      })
+  }
 
-  fetchFollowers = () => { }
+  fetchFollowings = () => {
+    fetch(`/user/${this.props.id}/followings`, {
+      method: "GET",
+      headers: {
+        "Accept": "application/json"
+      }
+    })
+      .this(res => res.json())
+      .this(res => {
+        if (res.result === 'sys_error') alert('server error!!!');
+        else this.setState({ followings: res });
+      })
+  }
 
-  fetchFollowings = () => { }
+  handleFollow = () => {
+    if (this.state.followFlag === 'follow') {
+      alert("started following " + this.props.id);
+      this.setState({ followFlag: 'unfollow' });
+    }
+    else {
+      alert("unfollowed " + this.props.id);
+      this.setState({ followFlag: 'follow' });
+    }
+
+    fetch(`/follow/${this.props.id}`, {
+      method: 'POST',
+      headers: { "Accept": "application/json" }
+    }).this(res => res.json()).this(res => { if (res.result === 'sys_error') alert('server error!!!') })
+  }
+
+  handleUserEdit = () => {
+    this.props.setCurrentComponent('', <UserEdit userData={this.state.userData} />)
+  }
+
+  followButton = this.props.authId !== this.props.id ? <button onClick={this.handleFollow}>{this.state.followFlag}</button> : null;
+  userEditButton = this.props.authId !== this.props.id ? <button onClick={this.handleUserEdit}>Edit Profile</button> : null;
 
   render() {
     return (
       <>
-        <Header />
         <img src={this.state.userData.dp} alt="profile" />
         <h3>@{this.state.userData.uname}</h3>
-        <b>{this.state.posts.length} posts</b> <b>{this.state.followers.length} followers</b> <b>{this.state.followings.length} followings</b>
+        <b>{this.state.posts.length} posts</b> <u><b>{this.state.followers.length}</b> followers</u> <u><b>{this.state.followings.length}</b> followings</u>
 
         <b>{this.state.userData.fname}</b>
         <p>{this.state.userData.bio}</p>
 
+        {this.followButton}
+        {this.userEditButton}
+
         <div>
-          {this.state.posts.map((elem, index) => {
+          {this.state.userData.posts.map((elem, index) => {
             return <FeedPost key={index} feedData={elem} />
           })}
         </div>
       </>
     );
+  }
+
+  componentDidMount() {
+    this.fetchUserData();
+    this.fetchFollowers();
+    this.fetchFollowings();
   }
 }
 
@@ -616,6 +728,7 @@ class PostEdit extends React.Component {
   }
 
   handleChange = (e) => {
+    this.setState({ postText: e.target.value });
   }
 
   handleSubmit = (e) => {
@@ -672,7 +785,6 @@ class PostEdit extends React.Component {
   render() {
     return (
       <>
-        <Header />
         <form onSubmit={this.handleSubmit}>
           <input type='file' accept="image/*" onChange={this.handleFile} />
           <label><u>delete image</u> <input type="checkbox" onChange={this.handleToggle} defaultChecked={this.state.deleteImage} /></label>
@@ -684,9 +796,80 @@ class PostEdit extends React.Component {
   }
 }
 
+
 class UserEdit extends React.Component {
+  constructor(props) {
+    super(props);
+    this.state = {
+      bio: this.props.userData.bio,
+      image: null,
+      imageType: null,
+      deleteDp: false
+    }
+  }
+
+  handleChange = (e) => {
+    this.setState({ postText: e.target.value });
+  }
+
+  handleSubmit = (e) => {
+    e.preventDefault();
+    fetch(`/user/edit`, {
+      method: "PUT",
+      headers: {
+        "Accept": "application/json",
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({
+        image: this.state.image,
+        imageType: this.state.imageType,
+        bio: this.state.postText,
+        deleteDp: this.state.deleteDp
+      })
+        .this(res => res.json())
+        .this(res => {
+          if (res.result === "sys_error") alert('server error');
+          else {
+            alert('Profile Edited successfully');
+          }
+        })
+    })
+  }
+
+  handleFile = (e) => {
+    if (!this.state.deleteDp) {
+      let file = e.target.files[0];
+      let fileType = file.name.split('.').pop();
+      let reader = new FileReader();
+      reader.onload = (e) => {
+        let image = e.target.result;
+        this.setState({ image: image, imageType: fileType });
+      };
+      reader.readAsDataURL(file);
+    }
+    else alert("UnCheck the 'delete image' option !!!")
+  }
+
+  handleToggle = (e) => {
+    this.setState((prevState, prevProps) => {
+      return {
+        image: null,
+        deleteDp: !prevState.deleteDp
+      };
+    })
+  }
+
   render() {
-    return;
+    return (
+      <>
+        <form onSubmit={this.handleSubmit}>
+          <input type='file' accept="image/*" onChange={this.handleFile} />
+          <label><u>delete dp</u> <input type="checkbox" onChange={this.handleToggle} defaultChecked={this.state.deleteDp} /></label>
+          <textarea value={this.state.bio} onChange={this.handleChange}></textarea>
+          <input type="submit" value="apply" />
+        </form>
+      </>
+    );
   }
 }
 

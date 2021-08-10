@@ -15,12 +15,15 @@ const imagekit = new ImageKit({
 app.use(cookieParser());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+app.use(express.static(__dirname + '/build'));
 
 //-----HOME PAGE---------
-app.get('/', (req, res) => { })
+app.get('/', (req, res) => {
+    res.sendFile(__dirname + '/build/index.html')
+})
 //-----------------------
 
-//-------AUTH------------
+//-------------------------------AUTH--------------------------------------
 app.post('/user/register', async (req, res) => {
     const { name, username, passwd } = req.body;
 
@@ -91,8 +94,8 @@ app.get('/user/logout', (req, res) => {
     }
 });
 
-app.put('/password_rest/:new_passwd', async (req, res) => {
-    let { new_passwd } = req.params;
+app.put('/password_rest', async (req, res) => {
+    let { new_passwd } = req.body;
     let hashedPasswd = await crypto.hash(new_passwd, 10);
 
     db.query("update users set passwd=$1", [hashedPasswd], (err, result) => {
@@ -103,7 +106,7 @@ app.put('/password_rest/:new_passwd', async (req, res) => {
         res.json({ result: "success" });
     })
 })
-//-----------------------
+//----------------------------------------------------------------
 
 app.get('/feed/:count', (req, res) => {
     if (req.cookies['userId']) {
@@ -260,12 +263,12 @@ app.put('/post/:pid/edit', (req, res) => {
     if (req.cookies['userId']) {
         let pid = req.params.pid;
 
-        let newImage = req.body.image;
-        let newImageType = req.body.imageType;
+        let newDp = req.body.image;
+        let newDpType = req.body.imageType;
         let newPostText = req.body.text;
         let deleteImage = req.body.deleteImage;
 
-        if (newImage || deleteImage) {
+        if (newDp || deleteImage) {
             db.query('select media_id from posts where pid=$1', [pid], (err, result) => {
                 if (err) {
                     res.json({ result: 'sys_error' });
@@ -277,10 +280,10 @@ app.put('/post/:pid/edit', (req, res) => {
                         imagekit.deleteFile(media_id, (err, result) => { });
                     }
 
-                    if (newImage) {
+                    if (newDp) {
                         imagekit.upload({
-                            file: newImage,
-                            fileName: `${req.cookies['userId']}_upload.${newImageType}`,
+                            file: newDp,
+                            fileName: `${req.cookies['userId']}_upload.${newDpType}`,
                         }, (err, result) => {
                             if (err) {
                                 res.json({ result: 'sys_error' });
@@ -324,40 +327,69 @@ app.put('/post/:pid/edit', (req, res) => {
     }
 })
 
-app.put('/profile/edit', (req, res) => {
+app.put('/user/edit', (req, res) => {
     if (req.cookies['userId']) {
-        let { name, profileImage, profileImageType, bio } = req.body;
+        let id = req.cookies['userId'];
 
-        let query = 'update users set';
+        let newDp = req.body.image;
+        let newDpType = req.body.imageType;
+        let newBio = req.body.bio;
+        let deleteDp = req.body.deleteDp;
 
-        query += `name=${name}` ? name : '';
-        query += `bio=${bio}` ? bio : '';
-
-        if (profileImage) {
-            imagekit.upload({
-                file: profileImage,
-                fileName: `${req.cookies['userId']}_dp_upload.${profileImageType}`
-            }, (err, result) => {
-                if (err) res.end('sys_error');
-                else {
-                    query += `dp=${result.url} where id=${req.cookies['userId']}`;
-                    db.query(query, (err, result) => {
-                        if (err) res.end('sys_error');
-                        else res.end('success');
-                    })
+        if (newDp || deleteDp) {
+            db.query('select dp_file_id from users where id=$1', [id], (err, result) => {
+                if (err) {
+                    res.json({ result: 'sys_error' });
                 }
+                else {
+                    let media_id = result.rows[0].dp_file_id;
+
+                    if (media_id) {
+                        imagekit.deleteFile(media_id, (err, result) => { });
+                    }
+
+                    if (newDp) {
+                        imagekit.upload({
+                            file: newDp,
+                            fileName: `${req.cookies['userId']}_upload.${newDpType}`,
+                        }, (err, result) => {
+                            if (err) {
+                                res.json({ result: 'sys_error' });
+                            }
+
+                            else {
+                                db.query('update users set dp=$1, dp_file_id=$2, bio=$3 where id=$4', [result.url, result.fileId, newBio, id], (err, res) => {
+                                    if (err) {
+                                        res.json({ result: 'sys_error' });
+                                    }
+
+                                    else res.json({ result: "success" });
+                                })
+                            }
+                        })
+                    }
+
+                    else {
+                        db.query("update users set dp='', dp_file_id='', content=$1 where id=$2", [newBio, id], (err, res) => {
+                            if (err) {
+                                res.json({ result: 'sys_error' });
+                            }
+
+                            else res.json({ result: "success" });
+                        })
+                    }
+                }
+
             })
         }
 
         else {
-            query += `where id=${req.cookies['userId']}`;
-            db.query(query, (err, result) => {
-                if (err) res.end('sys_error');
-                else res.end('success');
+            db.query('update users set content=$1 where id=$2', [newBio, id], (err, res) => {
+                if (err) res.json({ result: 'sys_error' });
+                else res.json({ result: 'success' });
             })
         }
     }
-
     else {
         res.end('auth_error');
     }
@@ -509,6 +541,36 @@ app.get('/user/search/:uname', (req, res) => {
                 res.json({ id: result.rows[0].id });
             }
             else res.json({ result: "not_found" });
+        })
+    }
+    else res.json({ result: "auth_error" });
+})
+
+app.get('/user/:id/followings', (req, res) => {
+    if (req.cookies['userId']) {
+        let { id } = req.params;
+
+        db.query('select followee, u.dp, u.uname from follow f inner join users u on f.followee=u.id where follower=$1 ', [id], (err, result) => {
+            if (err) {
+                console.log(err);
+                res.json({ result: "sys_error" });
+            }
+            else res.json(result.rows);
+        })
+    }
+    else res.json({ result: "auth_error" });
+})
+
+app.get('/user/:id/followers', (req, res) => {
+    if (req.cookies['userId']) {
+        let { id } = req.params;
+
+        db.query('select followee from follow f inner join users u on f.followee=u.id where followee=$1', [id], (err, result) => {
+            if (err) {
+                console.log(err);
+                res.json({ result: "sys_error" });
+            }
+            else res.json(result.rows);
         })
     }
     else res.json({ result: "auth_error" });

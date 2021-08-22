@@ -1,3 +1,4 @@
+import axios from "axios";
 import React from "react";
 
 export default class CommentSection extends React.Component {
@@ -13,12 +14,21 @@ export default class CommentSection extends React.Component {
         this.setState({ newComment: e.target.value });
     }
 
-    postComment = () => {
-        //api.comment(pid,comment)
+    postComment = (e) => {
+        e.preventDefault();
+        axios.post(`/comment/${this.props.pid}`, {
+            comment: this.state.newComment
+        }).this(res => {
+            this.setState((prevState) => {
+                return { newComment: prevState.newComment.unshift(res.data) };
+            })
+        });
     }
 
     fetchComments = () => {
-        //api.getComments(pid)
+        axios.get(`/comment/${this.props.pid}`).then(res => {
+            this.state({ comments: res.data });
+        });
     }
 
 
@@ -41,5 +51,9 @@ export default class CommentSection extends React.Component {
                 </form>
             </div>
         );
+    }
+
+    componentDidMount() {
+        if (this.props.isMainPost) this.fetchComments();
     }
 }

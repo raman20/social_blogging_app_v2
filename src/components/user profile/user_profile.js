@@ -1,21 +1,37 @@
 import React from "react";
-import Post from "../post utils/post";
+import cookie from 'react-cookies';
+import axios from "axios";
+import PostList from "../post utils/post_list";
 
 export default class UserProfile extends React.Component {
     constructor(props) {
         super(props);
         this.state = {
-            userData: {},
-            userPostData: [],
+            userData: null,
+            followers: [],
+            following: []
         };
     }
 
     fetchUserData = () => {
-        //api.user(id);
+        axios.get(`/user/:id`).then(res => {
+            this.setState({ userData: res });
+        })
+    }
+
+    fetchFollowers = () => {
+        axios.get(`/user/:id/followers`).then(res => {
+            this.setState({ followers: res.data });
+        })
+    }
+    fetchFollowing = () => {
+        axios.get(`/user/:id/followings`).then(res => {
+            this.setState({ following: res.data });
+        })
     }
 
     render() {
-        let editButton = <button onClick={this.editProfile}>Edit</button> ? window.id !== this.props.userId : null;
+        let editButton = cookie.load('userId') !== this.props.userId ? <button onClick={this.editProfile}>Edit</button> : null;
         return (
             <div>
                 <div>
@@ -25,26 +41,28 @@ export default class UserProfile extends React.Component {
                     <div>
                         <h3>@{this.state.userData.uname}</h3>
                         <div>
-                            <b>{this.state.userPostData.length} posts</b>
-                            <b>{this.state.userData.followerCount} followers</b>
-                            <b>{this.state.userData.followingCount} followings</b>
+                            <b>{this.state.userData.posts.length} posts</b>
+                            <b>{this.state.followers.length} followers</b>
+                            <b>{this.state.following.length} followings</b>
                         </div>
                         <div>
                             <b>{this.state.userData.fname}</b>
                             <p>{this.state.userData.bio}</p>
                         </div>
-                        <FollowButton userId={this.state.userData.id} />
+                        <FollowButton userId={this.state.userData.id} followed={this.state.userData.followed} />
                         <div>{editButton}</div>
                     </div>
                 </div>
                 <hr></hr>
-                <div>
-                    {this.state.userPostData.map((item, index) => {
-                        return <Post index={item.pid} key={index} postData={item} />
-                    })}
-                </div>
+                <PostList postFeedData={this.state.userData.posts} />
             </div>
         );
+    }
+
+    componentDidMount() {
+        this.fetchUserData();
+        this.fetchFollowers();
+        this.fetchFollowing();
     }
 }
 
@@ -52,18 +70,27 @@ class FollowButton extends React.Component {
     constructor(props) {
         super(props);
         this.state = {
-            followFlag: 'Follow'
+            followFlag: null
         }
     }
 
     handleFollow = () => {
-        // api.follow(uid);
+        axios.post(`/follow/${this.props.userId}`).then(res => {
+            if (res === 'success') {
+                if (this.state.followFlag === 'Follow') this.setState({ followFlag: 'Unfollow' });
+                else this.setState({ followFlag: 'Follow' });
+                alert(`${this.state.followFlag}ed successfully`)
+            }
+        })
     }
 
     render() {
-        let followButton = <button onClick={this.handleFollow}>{this.state.followFlag}</button> ? window.id !== this.props.userId : null;
-        return (
-            <div>{followButton}</div>
-        );
+        let followButton = cookie.load('userId') !== this.props.userId ? <button onClick={this.handleFollow}>{this.state.followFlag}</button> : null;
+        return <div>{followButton}</div>
+    }
+
+    componentDidMount() {
+        if (this.props.followed) this.setState({ followFlag: 'Unfollow' });
+        else this.setState({ followFlag: 'Follow' });
     }
 }

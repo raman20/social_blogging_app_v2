@@ -2,6 +2,8 @@ import React from "react";
 import Like from "./like_button";
 import LikeList from "./like_list";
 import CommentSection from "./comment_section";
+import cookie from "react-cookies";
+import axios from "axios";
 
 export default class Post extends React.Component {
     constructor(props) {
@@ -14,7 +16,6 @@ export default class Post extends React.Component {
     }
 
     handleLikeCount = () => {
-        // api.like(pid)
         if (this.state.likeFlag) {
             this.setState((prevState) => {
                 return { likeCount: prevState.likeCount - 1, likeFlag: !prevState.likeFlag };
@@ -45,7 +46,7 @@ export default class Post extends React.Component {
                 <Like handleLikeCount={this.handleLikeCount} pid={this.props.postData.pid} />
                 <LikeList likeCount={this.state.likeCount} pid={this.props.postData.pid} />
                 <u onClick={this.redirectToPost}>{this.state.commentCount} comments</u>
-                <CommentSection commentCount={this.state.commentCount} pid={this.props.postData.pid} setCommentCount={this.setCommentCount} />
+                <CommentSection commentCount={this.state.commentCount} pid={this.props.postData.pid} setCommentCount={this.setCommentCount} isMainPost={this.props.isMainPost} />
             </div>
         );
     }
@@ -67,7 +68,7 @@ class PostHeader extends React.Component {
             <div>
                 <img src={this.props.userData.dp} alt="user" onClick={this.redirectToUser} />
                 <b onClick={this.redirectToUser}>{this.props.userData.uname}</b>
-                <PostOptions userId={this.props.userData.id} />
+                <PostOptions userId={this.props.userData.id} pid={this.props.pid} />
             </div>
         );
     }
@@ -86,14 +87,19 @@ class PostBody extends React.Component {
 
 class PostOptions extends React.Component {
     postDelete = () => {
-        //api.deletePost(pid)
+        axios.delete(`/post/delete/${this.props.pid}`).then(res => {
+            if (res.data === 'success') {
+                alert('post deleted successfully')
+                //redirect to home
+            }
+        })
     }
 
     postEdit = () => {
         //redirect to post Edit component
     }
 
-    options = <><b onClick={this.postDelete}>delete</b><b onClick={this.postEdit}>Edit</b></> ? window.id === this.props.userId : null;
+    options = cookie.load('userId') === this.props.userId ? <><b onClick={this.postDelete}>delete</b><b onClick={this.postEdit}>Edit</b></> : null;
     render() {
         return (
             <div>

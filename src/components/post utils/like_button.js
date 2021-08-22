@@ -1,9 +1,16 @@
+import axios from "axios";
 import React from "react";
 
 export default class Like extends React.Component {
+
     handleLike = () => {
-        //api.like(this.props.pid)
-        //this.setLikeCount();
+
+        axios.post(`/like/${this.props.pid}`)
+            .then(res => {
+                if (res.data === 'success') {
+                    this.props.handleLikeCount();
+                }
+            })
     }
 
     render() {

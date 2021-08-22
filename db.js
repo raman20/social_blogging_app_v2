@@ -8,8 +8,8 @@ const conn = new Pool({
 })
 
 module.exports = {
-    query: (QueryString, params, callBack) => {
-        return conn.query(QueryString, params, callBack);
+    query: (QueryString, params) => {
+        return conn.query(QueryString, params);
     }
 }
 

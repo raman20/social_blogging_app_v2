@@ -1,10 +1,10 @@
 import React from "react";
-import FeedPost from "./feed_post";
+import Post from "./post";
 
 export default class PostList extends React.Component {
     render() {
         let postList = this.props.postFeedData.map((item, index) => {
-            return <FeedPost key={index} postData={item} />
+            return <Post key={index} postData={item} isMainPost={false} />
         })
         return (
             <div>

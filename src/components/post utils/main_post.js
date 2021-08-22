@@ -1,5 +1,5 @@
+import axios from "axios";
 import React from "react";
-import CommentSection from "./comment_section";
 import Post from "./post";
 
 export default class MainPost extends React.Component {
@@ -11,15 +11,14 @@ export default class MainPost extends React.Component {
     }
 
     fetchPostData = () => {
-        // api.post(pid)
+        axios.get(`/post/pid`).then(res => {
+            this.setState({ postData: res.data });
+        })
     }
 
     render() {
         return (
-            <>
-                <Post postData={this.state.postData}/>
-                <CommentSection pid={this.props.pid}/>
-            </>
+            <Post postData={this.state.postData} isMainPost={true} />
         );
     }
 

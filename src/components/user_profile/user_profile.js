@@ -1,42 +1,45 @@
 import React from "react";
 import cookie from 'react-cookies';
 import axios from "axios";
-import PostList from "../post utils/post_list";
+import PostList from "../post_utils/post_list";
+import { redirectTo } from "@reach/router";
 
 export default class UserProfile extends React.Component {
     constructor(props) {
         super(props);
         this.state = {
-            userData: null,
+            userData: {},
             followers: [],
             following: []
         };
     }
 
     fetchUserData = () => {
-        axios.get(`/user/:id`).then(res => {
-            this.setState({ userData: res });
+        axios.get(`http://localhost:3001/user/${this.props.id}`).then(res => {
+            this.setState({ userData: res.data });
         })
     }
 
     fetchFollowers = () => {
-        axios.get(`/user/:id/followers`).then(res => {
+        axios.get(`http://localhost:3001/user/${this.props.id}/followers`).then(res => {
             this.setState({ followers: res.data });
         })
     }
     fetchFollowing = () => {
-        axios.get(`/user/:id/followings`).then(res => {
+        axios.get(`http://localhost:3001/user/${this.props.id}/followings`).then(res => {
             this.setState({ following: res.data });
         })
     }
 
+    editProfile = () => { redirectTo(`http://localhost:3001/u/${this.props.id}/edit`); }
+
     render() {
-        let editButton = cookie.load('userId') !== this.props.userId ? <button onClick={this.editProfile}>Edit</button> : null;
+        let editButton = cookie.load('userId') === this.props.id ? <button onClick={this.editProfile}>Edit</button> : null;
         return (
             <div>
                 <div>
                     <div>
-                        <img src={this.userData.dp} alt="user profile" />
+                        <img src={this.state.userData.dp} alt="user profile" />
                     </div>
                     <div>
                         <h3>@{this.state.userData.uname}</h3>
@@ -75,17 +78,23 @@ class FollowButton extends React.Component {
     }
 
     handleFollow = () => {
-        axios.post(`/follow/${this.props.userId}`).then(res => {
-            if (res === 'success') {
-                if (this.state.followFlag === 'Follow') this.setState({ followFlag: 'Unfollow' });
-                else this.setState({ followFlag: 'Follow' });
-                alert(`${this.state.followFlag}ed successfully`)
-            }
-        })
+        if (cookie.load('userId')) {
+            axios.post(`http://localhost:3001/follow/${this.props.userId}`).then(res => {
+                if (res === 'success') {
+                    if (this.state.followFlag === 'Follow') this.setState({ followFlag: 'Unfollow' });
+                    else this.setState({ followFlag: 'Follow' });
+                    alert(`${this.state.followFlag}ed successfully`)
+                }
+            })
+        }
+        else {
+            alert('please login to follow');
+            redirectTo('http://localhost:3001/login');
+        }
     }
 
     render() {
-        let followButton = cookie.load('userId') !== this.props.userId ? <button onClick={this.handleFollow}>{this.state.followFlag}</button> : null;
+        let followButton = cookie.load('userId') === this.props.userId ? null : <button onClick={this.handleFollow}>{this.state.followFlag}</button>;
         return <div>{followButton}</div>
     }
 

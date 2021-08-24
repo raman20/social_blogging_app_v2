@@ -4,6 +4,7 @@ import LikeList from "./like_list";
 import CommentSection from "./comment_section";
 import cookie from "react-cookies";
 import axios from "axios";
+import { redirectTo } from "@reach/router";
 
 export default class Post extends React.Component {
     constructor(props) {
@@ -35,13 +36,13 @@ export default class Post extends React.Component {
     }
 
     redirectToPost = () => {
-        // redirect to main post component
+        redirectTo(`http://localhost:3001/p/${this.props.postData.pid}`);
     }
 
     render() {
         return (
             <div>
-                <PostHeader userData={{ dp: this.props.postData.dp, uname: this.props.postData.uname }} pid={this.props.postData.pid} />
+                <PostHeader userData={{ dp: this.props.postData.dp, uname: this.props.postData.uname, id: this.props.postData.id }} pid={this.props.postData.pid} />
                 <PostBody media_url={this.props.postData.media_url} content={this.props.postData.content} />
                 <Like handleLikeCount={this.handleLikeCount} pid={this.props.postData.pid} />
                 <LikeList likeCount={this.state.likeCount} pid={this.props.postData.pid} />
@@ -61,7 +62,7 @@ export default class Post extends React.Component {
 
 class PostHeader extends React.Component {
     redirectToUser = () => {
-        // redirect to user component
+        redirectTo(`http://localhost:3001/u/${this.props.userData.id}`)
     }
     render() {
         return (
@@ -87,16 +88,16 @@ class PostBody extends React.Component {
 
 class PostOptions extends React.Component {
     postDelete = () => {
-        axios.delete(`/post/delete/${this.props.pid}`).then(res => {
+        axios.delete(`http://localhost:3001/post/delete/${this.props.pid}`).then(res => {
             if (res.data === 'success') {
-                alert('post deleted successfully')
-                //redirect to home
+                alert('post deleted successfully');
+                redirectTo('http://localhost:3001/home');
             }
         })
     }
 
     postEdit = () => {
-        //redirect to post Edit component
+        redirectTo(`http://localhost:3001/p/${this.props.userId}/edit`);
     }
 
     options = cookie.load('userId') === this.props.userId ? <><b onClick={this.postDelete}>delete</b><b onClick={this.postEdit}>Edit</b></> : null;

@@ -1,7 +1,9 @@
+import { redirectTo } from "@reach/router";
 import axios from "axios";
 import React from "react";
+import cookie from 'react-cookies';
 
-export default class UserEdit extends React.Component {
+export default class PostEdit extends React.Component {
 
     constructor(props) {
         super(props);
@@ -46,7 +48,7 @@ export default class UserEdit extends React.Component {
 
     handleSubmit = (e) => {
         e.preventDefault();
-        axios.put(`/post/:pid/edit`, {
+        axios.put(`http://localhost:3001/post/${this.props.pid}/edit`, {
             image: this.state.image,
             imageType: this.state.imageType,
             text: this.state.postText,
@@ -57,14 +59,14 @@ export default class UserEdit extends React.Component {
     }
 
     fetchPostContent = () => {
-        axios.get(`/post/content/:pid`).then(res => { this.setState({ newPost: res.data }) });
+        axios.get(`http://localhost:3001/post/content/${this.props.pid}`).then(res => { this.setState({ newPost: res.data }) });
     }
 
     deletePost = () => {
-        axios.delete(`/post/delete/${this.props.pid}`).then(res => {
+        axios.delete(`http://localhost:3001/post/delete/${this.props.pid}`).then(res => {
             if (res.data === 'success') {
                 alert('post deleted successfully')
-                //redirect to home
+                redirectTo('http://localhost:3001/home');
             }
         })
     }
@@ -84,6 +86,7 @@ export default class UserEdit extends React.Component {
     }
 
     componentDidMount() {
+        if (!cookie.load('userId')) redirectTo('http://localhost:3001/login');
         this.fetchPostContent();
     }
 

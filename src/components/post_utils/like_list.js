@@ -20,7 +20,7 @@ export default class LikeList extends React.Component {
     }
 
     fetchLikes = () => {
-        axios.get(`/like/${this.props.pid}`).then(res => this.setState({ likes: res.data }));
+        axios.get(`http://localhost:3001/like/${this.props.pid}`).then(res => this.setState({ likes: res.data }));
     }
 
     render() {
@@ -37,7 +37,7 @@ export default class LikeList extends React.Component {
                     <b style={{ 'color': 'red' }} onClick={this.closeLikeList}> X </b>
                 </div>
                 <div>
-                    <u onClick={this.showLikeList}><b>this.props.likeCount</b></u>
+                    <u onClick={this.showLikeList}><b>{this.props.likeCount}</b></u>
                 </div>
             </>
         );

@@ -1,5 +1,7 @@
 import React from "react";
 import axios from "axios";
+import cookie from 'react-cookies';
+import { redirectTo } from "@reach/router";
 
 export default class Login extends React.Component {
     constructor(props) {
@@ -38,5 +40,9 @@ export default class Login extends React.Component {
                 <span>register</span>
             </div>
         );
+    }
+
+    componentDidMount() {
+        if(cookie.load('userId')) redirectTo('/home');
     }
 }

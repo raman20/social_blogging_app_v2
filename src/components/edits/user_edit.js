@@ -1,5 +1,7 @@
+import cookie from 'react-cookies';
 import React from "react";
 import axios from 'react';
+import { redirectTo } from "@reach/router";
 
 export default class UserEdit extends React.Component {
 
@@ -10,7 +12,7 @@ export default class UserEdit extends React.Component {
             newBio: null,
             newImage: null,
             newImageType: null,
-            dpDeleteFlag: false
+            deleteDp: false
         }
     }
 
@@ -44,7 +46,7 @@ export default class UserEdit extends React.Component {
     handleSubmit = (e) => {
         e.preventDefault();
 
-        axios.put('/user/edit', {
+        axios.put('http://localhost:3001/user/edit', {
             image: this.state.image,
             imageType: this.state.imageType,
             bio: this.state.postText,
@@ -66,5 +68,11 @@ export default class UserEdit extends React.Component {
                 </form>
             </div>
         );
+    }
+
+    componentDidMount() {
+        if (!cookie.load('userId')) {
+            redirectTo('http://localhost:3001/login')
+        }
     }
 }

@@ -4,6 +4,7 @@ const crypto = require('bcrypt');
 const cookieParser = require('cookie-parser');
 const ImageKit = require("imagekit");
 const app = express();
+const cors = require('cors');
 const port = 3001;
 
 const imagekit = new ImageKit({
@@ -13,13 +14,17 @@ const imagekit = new ImageKit({
 });
 
 app.use(cookieParser());
+app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(express.static(__dirname + '/build'));
+app.get('*', (req, res) => {
+    res.sendFile(__dirname + '/build/index.html');
+})
 
 //-----HOME PAGE---------
 app.get('/', (req, res) => {
-    res.sendFile(__dirname + '/build/index.html')
+    res.sendFile(__dirname + '/build/index.html');
 })
 //-----------------------
 
@@ -45,15 +50,15 @@ app.post('/user/login', async (req, res) => {
     let result = await db.query(query, [username]);
 
     let hashedPassword = result.rows[0].passwd;
-    let output = await crypto.compare(password, hashedPassword)
+    let output = await crypto.compare(password, hashedPassword);
     if (output) {
         res.cookie('userId', result.rows[0].id);
         res.cookie('userName', result.rows[0].uname);
-        res.end("succes");
+        res.end("success");
     }
 
     else {
-        req.end("auth_error");
+        res.end("auth_error");
     }
 })
 
@@ -348,7 +353,7 @@ app.get('/user/:id', async (req, res) => {
         let user = result.rows[0];
 
         result = await db.query('select * from posts where id=$1 order by created desc', [id]);
-        user.posts = result.rows
+        user.posts = result.rows ? result.rows : [];
 
         result = await db.query('select count(1) from follow where follower=$1 and followee=$2', [req.cookies['userId'], id]);
         user.followed = parseInt(result.rows[0].count);
@@ -356,7 +361,7 @@ app.get('/user/:id', async (req, res) => {
         res.json(user);
     }
 
-    else res.json({ result: "auth_error" });
+    else res.end("auth_error");
 })
 
 app.get('/user/search/:uname', async (req, res) => {

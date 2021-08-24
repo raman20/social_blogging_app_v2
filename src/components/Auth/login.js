@@ -1,12 +1,14 @@
+import { Link, redirectTo } from "@reach/router";
 import axios from "axios";
+import cookie from 'react-cookies';
 import React from "react";
 
 export default class Login extends React.Component {
     constructor(props) {
         super(props);
         this.state = {
-            username: null,
-            password: null
+            username: '',
+            password: ''
         };
     }
 
@@ -16,13 +18,11 @@ export default class Login extends React.Component {
 
     handleSubmit = (e) => {
         e.preventDefault();
-        axios.post('/user/login', {
+        axios.post('http://localhost:3001/user/login', {
             username: this.state.username,
             password: this.state.password
         }).then(res => {
-            if (res.data === 'success') {
-                //redirect to home
-            }
+            if (res.data === 'success') redirectTo('http://localhost:3001/home');
             else if (res.data === 'auth_error') alert('User not exist!!! \ncheck your username or password');
         })
     }
@@ -35,9 +35,12 @@ export default class Login extends React.Component {
                     <input type='password' value={this.state.password} id='password' onChange={this.handleChange} />
                     <input type='submit' />
                 </form>
-                <span>forgote password?</span>
-                <span>register</span>
+                <Link to='/register'>register</Link>
             </div>
         );
+    }
+
+    componentDidMount() {
+        if (cookie.load('userId')) redirectTo('http://localhost:3001/home');
     }
 }

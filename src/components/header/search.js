@@ -1,6 +1,6 @@
 import React from "react";
-import cookie from 'react-cookies';
 import axios from "axios";
+import { redirectTo } from "@reach/router";
 
 export default class Search extends React.Component {
     constructor(props) {
@@ -11,12 +11,11 @@ export default class Search extends React.Component {
     }
 
     handleSubmit = () => {
-        // api.search(this.state.searchVal)
-        axios.get(`/user/search/${cookie.load('userName')}`)
+        axios.get(`http://localhost:3001/user/search/${this.state.searchVal}`)
             .then(res => {
                 if (res.data === 'not_found') alert('user not found!!!');
                 else {
-                    //redirect to user
+                    redirectTo(`/u/${res.data.id}`);
                 }
             })
     }

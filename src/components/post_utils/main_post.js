@@ -11,7 +11,7 @@ export default class MainPost extends React.Component {
     }
 
     fetchPostData = () => {
-        axios.get(`/post/pid`).then(res => {
+        axios.get(`http://localhost:3001/post/${this.props.pid}`).then(res => {
             this.setState({ postData: res.data });
         })
     }

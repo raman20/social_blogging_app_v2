@@ -1,5 +1,7 @@
+import { redirectTo } from "@reach/router";
 import axios from "axios";
 import React from "react";
+import cookie from 'react-cookies';
 
 export default class CommentSection extends React.Component {
     constructor(props) {
@@ -16,17 +18,20 @@ export default class CommentSection extends React.Component {
 
     postComment = (e) => {
         e.preventDefault();
-        axios.post(`/comment/${this.props.pid}`, {
-            comment: this.state.newComment
-        }).this(res => {
-            this.setState((prevState) => {
-                return { newComment: prevState.newComment.unshift(res.data) };
-            })
-        });
+        if (cookie.load('userId')) {
+            axios.post(`http://localhost:3001/comment/${this.props.pid}`, {
+                comment: this.state.newComment
+            }).this(res => {
+                this.setState((prevState) => {
+                    return { newComment: prevState.newComment.unshift(res.data) };
+                })
+            });
+        }
+        else redirectTo('http://localhost:3001/login');
     }
 
     fetchComments = () => {
-        axios.get(`/comment/${this.props.pid}`).then(res => {
+        axios.get(`http://localhost:3001/comment/${this.props.pid}`).then(res => {
             this.state({ comments: res.data });
         });
     }

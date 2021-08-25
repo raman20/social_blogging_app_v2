@@ -18,9 +18,6 @@ app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(express.static(__dirname + '/build'));
-app.get('*', (req, res) => {
-    res.sendFile(__dirname + '/build/index.html');
-})
 
 //-----HOME PAGE---------
 app.get('/', (req, res) => {
@@ -89,11 +86,11 @@ app.get('/feed/:offset', async (req, res) => {
         let query = `   select p.id, p.pid, p.content, p.media_url, p.likecount, p.commentcount, p.created, u.uname, u.dp 
                         from posts p inner join users u
                         on u.id=p.id
-                        where p.id in (select followee from follow where follower=$1) 
-                        order by created desc offset $2 limit 20;
+                        where p.id in ((select followee from follow where follower=$1),$2) 
+                        order by created desc offset $3 limit 20;
                     `;
 
-        let result = await db.query(query, [userId, offset]);
+        let result = await db.query(query, [userId, req.cookies['userId'], offset]);
         res.json(result.rows);
     }
 
@@ -106,7 +103,9 @@ app.get('/post/:pid', async (req, res) => {
         let pid = parseInt(req.params.pid);
 
         let result = await db.query("select * from posts where pid=$1", [pid]);
-        res.json(result.rows[0]);
+        if (result.rows.length > 0) res.json(result.rows[0]);
+        else res.end('not_found');
+
     }
 
     else {
@@ -131,27 +130,16 @@ app.post('/post/new', (req, res) => {
                     res.end('sys_error');
                 }
                 else {
-                    db.query('insert into posts(id, content, media_url, media_id) values($1,$2,$3,$4)', [req.cookies['userId'], postText, result.url, result.fileId], (err, result) => {
-                        if (err) {
-                            console.log(err);
-                            res.end('sys_error');
-                        }
-                        else {
-                            res.end('success');
-                        }
+                    db.query('insert into posts(id, content, media_url, media_id) values($1,$2,$3,$4) returning *;', [req.cookies['userId'], postText, result.url, result.fileId], (err, result) => {
+                        res.json(result.rows[0]);
                     })
                 }
             })
         }
 
         else {
-            db.query('insert into posts(id, content) values($1, $2)', [req.cookies['userId'], postText], (err, res) => {
-                if (err) {
-                    res.end('sys_error');
-                }
-                else {
-                    res.end('success');
-                }
+            db.query('insert into posts(id, content) values($1, $2) returning *;', [req.cookies['userId'], postText], (err, result) => {
+                res.json(result.rows[0]);
             })
         }
 
@@ -169,7 +157,7 @@ app.post('/comment/:pid', async (req, res) => {
                     insert into comments(id,pid,comment) values($1,$2,$3) returning 
                     cid,pid,id,comment,created,(select uname from users where id=$1),(select dp from users where id=$1)
                     `
-        let result = await db.query(query, [req.cookies['userId'], pid, comment]);
+        let result = await db.query(query, [parseInt(req.cookies['userId']), parseInt(pid), comment]);
         res.json(result.rows[0]);
     }
     else res.end('auth_error');
@@ -190,7 +178,7 @@ app.get('/comment/:pid', async (req, res) => {
 
 app.put('/post/:pid/edit', async (req, res) => {
     if (req.cookies['userId']) {
-        let pid = req.params.pid;
+        let pid = parseInt(req.params.pid);
 
         let newImage = req.body.image;
         let newImageType = req.body.imageType;
@@ -235,7 +223,7 @@ app.put('/post/:pid/edit', async (req, res) => {
 
 app.put('/user/edit', async (req, res) => {
     if (req.cookies['userId']) {
-        let id = req.cookies['userId'];
+        let id = parseInt(req.cookies['userId']);
 
         let newDp = req.body.image;
         let newDpType = req.body.imageType;
@@ -301,9 +289,8 @@ app.post('/like/:pid', async (req, res) => {
         }
 
     }
-    else {
-        res.end('auth_error');
-    }
+
+    else res.end('auth_error');
 })
 
 app.get('/like/:pid', async (req, res) => {
@@ -324,17 +311,17 @@ app.post('/follow/:id', async (req, res) => {
     if (req.cookies['userId']) {
         let { id: followeeId } = req.params;
 
-        let result = await db.query('select count(1) from follow where follower=$1 and followee=$2', [req.cookies['userId'], followeeId]);
+        let result = await db.query('select count(1) from follow where follower=$1 and followee=$2', [parseInt(req.cookies['userId']), parseInt(followeeId)]);
 
         if (result.rows[0].count === '1') {
             //unfollow
-            await db.query('delete from follow where follower=$1 and followee=$2', [req.cookies['userId'], followeeId]);
+            await db.query('delete from follow where follower=$1 and followee=$2', [parseInt(req.cookies['userId']), parseInt(followeeId)]);
             res.end('success');
         }
 
         else {
             //follow
-            await db.query('insert into follow(follower, followee) values($1, $2)', [req.cookies['userId'], followeeId]);
+            await db.query('insert into follow(follower, followee) values($1, $2)', [parseInt(req.cookies['userId']), parseInt(followeeId)]);
             res.end('success');
         }
     }
@@ -344,19 +331,21 @@ app.post('/follow/:id', async (req, res) => {
     }
 })
 
-app.get('/user/:id', async (req, res) => {
+app.get('/user/:uname', async (req, res) => {
     if (req.cookies['userId']) {
-        let { id } = req.params;
+        let { uname } = req.params;
 
 
-        let result = await db.query('select * from users where id=$1', [id]);
+        let result = await db.query('select * from users where uname=$1', [uname]);
         let user = result.rows[0];
 
-        result = await db.query('select * from posts where id=$1 order by created desc', [id]);
+        result = await db.query('select * from posts where uname=$1 order by created desc', [uname]);
         user.posts = result.rows ? result.rows : [];
 
-        result = await db.query('select count(1) from follow where follower=$1 and followee=$2', [req.cookies['userId'], id]);
-        user.followed = parseInt(result.rows[0].count);
+        if (parseInt(req.cookies['userId']) !== user.id) {
+            result = await db.query('select count(1) from follow where follower=$1 and followee=$2', [parseInt(req.cookies['userId']), user.id]);
+            user.followed = parseInt(result.rows[0].count);
+        }
 
         res.json(user);
     }
@@ -369,7 +358,7 @@ app.get('/user/search/:uname', async (req, res) => {
         let { uname } = req.params;
 
         let result = await db.query('select id from users where uname=$1', [uname]);
-        if (result.rows[0].id) {
+        if (result.rows.length > 0) {
             res.json({ id: result.rows[0].id })
         }
         else res.end('not_found');
@@ -381,7 +370,7 @@ app.get('/user/:id/followings', async (req, res) => {
     if (req.cookies['userId']) {
         let { id } = req.params;
 
-        let result = await db.query('select followee, u.dp, u.uname from follow f inner join users u on f.followee=u.id where follower=$1 ', [id]);
+        let result = await db.query('select followee, u.dp, u.uname from follow f inner join users u on f.followee=u.id where follower=$1 ', [parseInt(id)]);
 
         res.json(result.rows);
     }
@@ -392,7 +381,7 @@ app.get('/user/:id/followers', async (req, res) => {
     if (req.cookies['userId']) {
         let { id } = req.params;
 
-        let result = await db.query('select followee from follow f inner join users u on f.followee=u.id where followee=$1', [id]);
+        let result = await db.query('select followee from follow f inner join users u on f.followee=u.id where followee=$1', [parseInt(id)]);
         res.json(result.rows);
     }
     else res.end("auth_error");
@@ -400,9 +389,10 @@ app.get('/user/:id/followers', async (req, res) => {
 
 app.delete('/post/delete/:pid', async (req, res) => {
     if (req.cookies['userId']) {
-        let { rows } = await db.query('select media_id from posts where pid=$1', [req.params.pid]);
+        let pid = parseInt(req.params.pid);
+        let { rows } = await db.query('select media_id from posts where pid=$1', [pid]);
         imagekit.deleteFile(rows[0].media_id);
-        await db.query('delete from posts where pid=$1 and id=$2', [req.params.pid, req.cookies['userId']]);
+        await db.query('delete from posts where pid=$1 and id=$2', [pid, parseInt(req.cookies['userId'])]);
         res.end("success");
     }
     else res.end("auth_error");
@@ -410,7 +400,7 @@ app.delete('/post/delete/:pid', async (req, res) => {
 
 app.get('/post/content/:pid', async (req, res) => {
     if (req.cookies['userId']) {
-        let { rows } = await db.query('select content from posts where pid=$1', [req.params.pid]);
+        let { rows } = await db.query('select content from posts where pid=$1', [parseInt(req.params.pid)]);
         res.end(rows[0]);
     }
     else res.end("auth_error");

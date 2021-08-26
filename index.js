@@ -4,7 +4,6 @@ const crypto = require('bcrypt');
 const cookieParser = require('cookie-parser');
 const ImageKit = require("imagekit");
 const app = express();
-const cors = require('cors');
 const port = 3001;
 
 const imagekit = new ImageKit({
@@ -14,7 +13,6 @@ const imagekit = new ImageKit({
 });
 
 app.use(cookieParser());
-app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(express.static(__dirname + '/build'));
@@ -45,13 +43,18 @@ app.post('/user/login', async (req, res) => {
     let query = 'select id, uname, passwd from users where uname=$1';
 
     let result = await db.query(query, [username]);
-
-    let hashedPassword = result.rows[0].passwd;
-    let output = await crypto.compare(password, hashedPassword);
-    if (output) {
-        res.cookie('userId', result.rows[0].id);
-        res.cookie('userName', result.rows[0].uname);
-        res.end("success");
+    if (result.rows.length > 0) {
+        let hashedPassword = result.rows[0].passwd;
+        let output = await crypto.compare(password, hashedPassword);
+        if (output) {
+            res.cookie('userId', result.rows[0].id);
+            res.cookie('userName', result.rows[0].uname);
+            console.log('\n\nhello\n\n')
+            res.end("success");
+        }
+        else {
+            res.end("auth_error");
+        }
     }
 
     else {
@@ -62,6 +65,7 @@ app.post('/user/login', async (req, res) => {
 app.get('/user/logout', (req, res) => {
     if (req.cookies['userId']) {
         res.clearCookie('userId');
+        res.clearCookie('userName');
         res.end('success');
     }
     else {
@@ -340,7 +344,7 @@ app.get('/user/:uname', async (req, res) => {
         let user = result.rows[0];
 
         result = await db.query('select * from posts where uname=$1 order by created desc', [uname]);
-        user.posts = result.rows ? result.rows : [];
+        user.posts = result.rows;
 
         if (parseInt(req.cookies['userId']) !== user.id) {
             result = await db.query('select count(1) from follow where follower=$1 and followee=$2', [parseInt(req.cookies['userId']), user.id]);
@@ -404,6 +408,10 @@ app.get('/post/content/:pid', async (req, res) => {
         res.end(rows[0]);
     }
     else res.end("auth_error");
+})
+
+app.use('*', (req, res) => {
+    res.sendFile(__dirname + '/build/index.html');
 })
 
 app.listen(port, () => {

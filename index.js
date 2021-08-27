@@ -341,17 +341,20 @@ app.get('/user/:uname', async (req, res) => {
 
 
         let result = await db.query('select * from users where uname=$1', [uname]);
-        let user = result.rows[0];
 
-        result = await db.query('select * from posts where uname=$1 order by created desc', [uname]);
-        user.posts = result.rows;
+        if (result.rowCount > 0) {
+            let user = result.rows[0];
+            result = await db.query('select * from posts where id=$1 order by created desc', [user.id]);
+            user.posts = result.rows.length > 0 ? result.rows : [];
+            if (parseInt(req.cookies['userId']) !== user.id) {
+                result = await db.query('select count(1) from follow where follower=$1 and followee=$2', [parseInt(req.cookies['userId']), user.id]);
+                user.followed = parseInt(result.rows[0].count);
+            }
 
-        if (parseInt(req.cookies['userId']) !== user.id) {
-            result = await db.query('select count(1) from follow where follower=$1 and followee=$2', [parseInt(req.cookies['userId']), user.id]);
-            user.followed = parseInt(result.rows[0].count);
+            res.json(user);
         }
 
-        res.json(user);
+        else res.end('not found');
     }
 
     else res.end("auth_error");

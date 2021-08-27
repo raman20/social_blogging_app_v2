@@ -17,13 +17,15 @@ export default class App extends React.Component {
 			auth: 0
 		}
 	}
+
+	setAuth = (val) => this.setState({ auth: val })
+
 	render() {
 		return (
 			<>
-				{this.state.auth ? <Header setAuth={(val) => this.setState({ auth: val })} /> : null}
+				{this.state.auth ? <Header setAuth={this.setAuth} /> : null}
 				<Router>
-					<AuthCheck path="/" />
-					<Login setAuth={(val) => this.setState({ auth: val })} path="/login" />
+					<Login setAuth={this.setAuth} path="/login" />
 					<Register path="/register" />
 					<Home path="/home" />
 					<MainPost path="/p/:pid" />
@@ -34,6 +36,12 @@ export default class App extends React.Component {
 			</>
 		);
 	}
+
+	componentDidMount() {
+		if (cookie.load("userId")) {
+			navigate('/home');
+		} else navigate('/login');
+	}
 }
 
 class AuthCheck extends React.Component {
@@ -42,7 +50,7 @@ class AuthCheck extends React.Component {
 	}
 	componentDidMount() {
 		if (cookie.load("userId")) {
-			navigate(`/home`);
-		} else navigate(`/login`);
+			navigate('/home');
+		} else navigate('/login');
 	}
 }

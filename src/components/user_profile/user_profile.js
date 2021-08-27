@@ -8,7 +8,9 @@ export default class UserProfile extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
-      userData: {},
+      userData: {
+        posts: []
+      },
       followers: [],
       following: []
     };
@@ -16,16 +18,17 @@ export default class UserProfile extends React.Component {
 
   fetchUserData = () => {
     axios
-      .get(`/user/${this.props.id}`)
+      .get(`/user/${this.props.uname}`)
       .then((res) => {
-        this.setState({ userData: res.data });
+        if (res.data === 'not found') navigate('/home');
+        else this.setState({ userData: res.data });
       });
   };
 
   fetchFollowers = () => {
     axios
       .get(
-        `/user/${this.props.id}/followers`
+        `/user/${this.props.uname}/followers`
       )
       .then((res) => {
         this.setState({ followers: res.data });
@@ -47,7 +50,7 @@ export default class UserProfile extends React.Component {
 
   render() {
     let editButton =
-      cookie.load("userId") === this.props.id ? (
+      cookie.load("userName") === this.props.uname ? (
         <button onClick={this.editProfile}>Edit</button>
       ) : null;
     return (
@@ -69,6 +72,7 @@ export default class UserProfile extends React.Component {
             </div>
             <FollowButton
               userId={this.state.userData.id}
+              userName={this.props.uname}
               followed={this.state.userData.followed}
             />
             <div>{editButton}</div>
@@ -117,7 +121,7 @@ class FollowButton extends React.Component {
 
   render() {
     let followButton =
-      cookie.load("userId") === this.props.userId ? null : (
+      cookie.load("userName") === this.props.userName ? null : (
         <button onClick={this.handleFollow}>{this.state.followFlag}</button>
       );
     return <div>{followButton}</div>;

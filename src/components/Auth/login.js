@@ -18,7 +18,6 @@ export default class Login extends React.Component {
 
   handleSubmit = (e) => {
     e.preventDefault();
-    console.log("api request");
     axios
       .post("/user/login", {
         username: this.state.username,
@@ -60,6 +59,6 @@ export default class Login extends React.Component {
   }
 
   componentDidMount() {
-    if (cookie.load("userId")) navigate(`/home`);
+    if (cookie.load("userId")) navigate('/home');
   }
 }

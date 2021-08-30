@@ -11,14 +11,11 @@ export default class Search extends React.Component {
   }
 
   handleSubmit = () => {
-    axios
-      .get(
-        `/user/search/${this.state.searchVal}`
-      )
+    axios.get(`/user/search/${this.state.searchVal}`)
       .then((res) => {
         if (res.data === "not_found") alert("user not found!!!");
         else {
-          navigate(`/u/${res.data.id}`);
+          navigate(`/u/${res.data.uname}`);
         }
       });
   };

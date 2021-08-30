@@ -184,39 +184,27 @@ app.put('/post/:pid/edit', async (req, res) => {
     if (req.cookies['userId']) {
         let pid = parseInt(req.params.pid);
 
-        let newImage = req.body.image;
-        let newImageType = req.body.imageType;
-        let newPostText = req.body.text;
-        let deleteImage = req.body.deleteImage;
+        let { newImageUrl, newImageId, newPost, deleteImage } = req.body;
 
-        if (newImage || deleteImage) {
+        if (newImageUrl || deleteImage) {
             let result = await db.query('select media_id from posts where pid=$1', [pid]);
-            let media_id = result.rows[0].media_id;
+            let media_id = result.rows.length > 0 ? result.rows[0].media_id : null;
 
             if (media_id) {
-                imagekit.deleteFile(media_id, (err, result) => { });
+                imagekit.deleteFile(media_id);
             }
 
-            if (newImage) {
-                imagekit.upload({
-                    file: newImage,
-                    fileName: `${req.cookies['userId']}_upload.${newImageType}`,
-                }, (err, result) => {
-
-                    db.query('update posts set media_url=$1, media_id=$2, content=$3 where pid=$4', [result.url, result.fileId, newPostText, pid], (err, res) => {
-                        res.end('success');
-                    })
-                })
-            }
-
-            else {
-                await db.query("update posts set media_url='', media_id='', content=$1 where pid=$2", [newPostText, pid]);
+            if (newImageUrl) {
+                await db.query('update posts set media_url=$1, media_id=$2, content=$3 where pid=$4', [newImageUrl, newImageId, newPost, pid])
+                res.end('success');
+            } else {
+                await db.query("update posts set media_url='', media_id='', content=$1 where pid=$2", [newPost, pid]);
                 res.end('success');
             }
         }
 
         else {
-            await db.query('update posts set content=$1 where pid=$2', [newPostText, pid]);
+            await db.query('update posts set content=$1 where pid=$2', [newPost, pid]);
             res.end('success');
         }
     }
@@ -228,45 +216,28 @@ app.put('/post/:pid/edit', async (req, res) => {
 app.put('/user/edit', async (req, res) => {
     if (req.cookies['userId']) {
         let id = parseInt(req.cookies['userId']);
+        let { newName, newDpUrl, newDpId, newBio, deleteDp } = req.body;
 
-        let newDp = req.body.image;
-        let newDpType = req.body.imageType;
-        let newBio = req.body.bio;
-        let deleteDp = req.body.deleteDp;
-
-        if (newDp || deleteDp) {
+        if (newDpUrl || deleteDp) {
             let result = await db.query('select dp_file_id from users where id=$1', [id]);
             let media_id = result.rows[0].dp_file_id;
 
             if (media_id) {
-                imagekit.deleteFile(media_id, (err, result) => { });
+                imagekit.deleteFile(media_id);
             }
 
-            if (newDp) {
-                imagekit.upload({
-                    file: newDp,
-                    fileName: `${req.cookies['userId']}_upload.${newDpType}`,
-                }, (err, result) => {
-                    if (err) {
-                        res.json({ result: 'sys_error' });
-                    }
-
-                    else {
-                        db.query('update users set dp=$1, dp_file_id=$2, bio=$3 where id=$4', [result.url, result.fileId, newBio, id], (err, res) => {
-                            res.end("success");
-                        })
-                    }
-                })
-            }
-
-            else {
-                await db.query("update users set dp='', dp_file_id='', content=$1 where id=$2", [newBio, id]);
+            if (newDpUrl) {
+                await db.query('update users set dp=$1, dp_file_id=$2, bio=$3 ,fname=$4 where id=$5', [newDpUrl, newDpId, newBio, newName, id])
+                res.end("success");
+            } else {
+                let defaultDp = 'https://ik.imagekit.io/2bb11e1dc25c4278b3c4/dp.jpeg?updatedAt=1627287903195';
+                await db.query("update users set dp=$1, dp_file_id='', bio=$2, fname=$3 where id=$4", [defaultDp, newBio, newName, id]);
                 res.end("success");
             }
         }
 
         else {
-            await db.query('update users set content=$1 where id=$2', [newBio, id]);
+            await db.query('update users set bio=$1, fname=$2 where id=$3', [newBio, newName, id]);
             res.end('success');
         }
     }
@@ -335,6 +306,14 @@ app.post('/follow/:id', async (req, res) => {
     }
 })
 
+app.get('/user/details', async (req, res) => {
+    if (req.cookies['userId']) {
+        let result = await db.query('select fname, bio from users where id=$1', [parseInt(req.cookies['userId'])]);
+        res.json(result.rows[0]);
+    }
+    else res.end('auth_error');
+})
+
 app.get('/user/:uname', async (req, res) => {
     if (req.cookies['userId']) {
         let { uname } = req.params;
@@ -365,8 +344,8 @@ app.get('/user/search/:uname', async (req, res) => {
         let { uname } = req.params;
 
         let result = await db.query('select id from users where uname=$1', [uname]);
-        if (result.rows.length > 0) {
-            res.json({ id: result.rows[0].id })
+        if (result.rowCount > 0) {
+            res.json({ id: result.rows[0].uname })
         }
         else res.end('not_found');
     }
@@ -411,6 +390,12 @@ app.get('/post/content/:pid', async (req, res) => {
         res.end(rows[0]);
     }
     else res.end("auth_error");
+})
+
+app.get('/imagekit_auth', (req, res) => {
+    if (req.cookies['userId'])
+        res.json(imagekit.getAuthenticationParameters());
+    else res.end('auth_error');
 })
 
 app.use('*', (req, res) => {

@@ -1,7 +1,6 @@
 import axios from "axios";
 import cookie from "react-cookies";
 import React from "react";
-import { navigate } from "@reach/router";
 
 export default class Like extends React.Component {
   handleLike = () => {
@@ -13,7 +12,7 @@ export default class Like extends React.Component {
             this.props.handleLikeCount();
           }
         });
-    } else navigate('/login');
+    } else alert('Login first to Like the post !!!')
   };
 
   render() {

@@ -35,7 +35,7 @@ export default class Login extends React.Component {
 
   render() {
     return (
-      <div className="login">
+      <div className="auth">
         <form onSubmit={this.handleSubmit}>
           <input
             type="text"

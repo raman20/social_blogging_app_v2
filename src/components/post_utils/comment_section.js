@@ -1,4 +1,3 @@
-import { navigate } from "@reach/router";
 import axios from "axios";
 import React from "react";
 import cookie from "react-cookies";
@@ -31,7 +30,8 @@ export default class CommentSection extends React.Component {
             return { newComment: prevState.newComment.unshift(res.data) };
           });
         });
-    } else navigate(`${document.location.origin}/login`);
+    }
+    else alert('Login first to comment !!!');
   };
 
   fetchComments = () => {

@@ -9,7 +9,7 @@ export default class Home extends React.Component {
     super(props);
     this.state = {
       postFeed: [],
-      postFeedOffset: 10
+      postFeedOffset: 0
     };
   }
 

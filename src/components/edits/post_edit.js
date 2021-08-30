@@ -2,63 +2,72 @@ import { navigate } from "@reach/router";
 import axios from "axios";
 import React from "react";
 import cookie from "react-cookies";
+import ImageKit from "imagekit-javascript";
 
 export default class PostEdit extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
-      newPost: null,
+      newPost: '',
       newImage: null,
-      newImageType: null,
+      newImageName: '',
       ImageDeleteFlag: false
     };
+    this.imagekit = new ImageKit({
+      publicKey: "public_BA4Pcimv5MNjuSgVgorpdDADpyc=",
+      urlEndpoint: "https://ik.imagekit.io/2bb11e1dc25c4278b3c4/",
+      authenticationEndpoint: `${document.location.origin}/imagekit_auth`
+    });
   }
 
-  handleName = (e) => {
-    this.setState({ newName: e.target.value });
-  };
-
-  handleBio = (e) => {
-    this.setState({ newBio: e.target.value });
-  };
-
-  handleImageDelete = () => {
-    this.setState((prevState, prevProps) => {
-      return {
-        newImageType: null,
-        ImageDeleteFlag: !prevState.ImageDeleteFlag
-      };
-    });
+  handleChange = (e) => {
+    if (e.target.id === "deleteImage") {
+      this.setState((prevState) => {
+        return {
+          newImage: null,
+          newImageName: '',
+          deleteImage: !prevState.deleteImage
+        };
+      });
+    } else this.setState({ [e.target.id]: e.target.value });
   };
 
   handleNewImage = (e) => {
     if (!this.state.ImageDeleteFlag) {
       let file = e.target.files[0];
       let fileType = file.name.split(".").pop();
-      let reader = new FileReader();
-      reader.onload = (e) => {
-        let image = e.target.result;
-        this.setState({ newImage: image, newImageType: fileType });
-      };
-      reader.readAsDataURL(file);
+      let fileName = `${cookie.load('userName')}_${this.props.pip}.${fileType}`;
+      this.setState({ newImage: file, newImageName: fileName });
     } else alert("UnCheck the 'delete image' option !!!");
   };
 
   handleSubmit = (e) => {
     e.preventDefault();
-    axios
-      .put(
-        `/post/${this.props.pid}/edit`,
-        {
-          image: this.state.image,
-          imageType: this.state.imageType,
-          text: this.state.postText,
-          deleteImage: this.state.deleteImage
-        }
-      )
-      .then((res) => {
-        alert("Post Edited successfully");
+    if (this.state.newImage) {
+
+      this.imagekit.upload({
+        file: this.state.newImage,
+        fileName: this.state.newImageName
+      }, (err, result) => {
+        axios.put(`/post/${this.props.pid}/edit`, {
+          newImageUrl: result.url,
+          newImageId: result.fileId,
+          newPost: this.state.newPost,
+        }).then((res) => {
+          if (res.data === 'success') alert("Post Edited successfully");
+        });
+      })
+
+    }
+    else {
+      axios.put(`/post/${this.props.pid}/edit`, {
+        text: this.state.postText,
+        deleteImage: this.state.deleteImage
+      }
+      ).then((res) => {
+        if (res.data === 'success') alert("Post Edited successfully");
       });
+    }
   };
 
   fetchPostContent = () => {
@@ -79,7 +88,7 @@ export default class PostEdit extends React.Component {
       .then((res) => {
         if (res.data === "success") {
           alert("post deleted successfully");
-          navigate(`${document.location.origin}/home`);
+          navigate('/home');
         }
       });
   };
@@ -89,16 +98,20 @@ export default class PostEdit extends React.Component {
       <div className="user_edit">
         <form onSubmit={this.handleSubmit}>
           <input type="file" accept="image/*" onChange={this.handleNewImage} />
-          <input
-            type="checkbox"
-            value=" delete image"
-            onClick={this.handleImageDelete}
-          />
+          <label>
+            <input
+              type="checkbox"
+              id='deleteImage'
+              value={this.state.deleteImage}
+              onClick={this.handleImageDelete}
+            /> Delete Image
+          </label>
           <textarea
+            id='newPost'
             value={this.state.newPost}
             onChange={this.handlePost}
           ></textarea>
-          <input type="submit" value="apply" />
+          <input type="submit" value="save" />
         </form>
         <button onClick={this.deletePost}> DELETE POST </button>
       </div>
@@ -106,7 +119,7 @@ export default class PostEdit extends React.Component {
   }
 
   componentDidMount() {
-    if (!cookie.load("userId")) navigate(`${document.location.origin}/login`);
+    if (!cookie.load("userId")) navigate('/login');
     this.fetchPostContent();
   }
 }

@@ -1,4 +1,4 @@
-import { redirectTo, Link } from "@reach/router";
+import { Link, navigate } from "@reach/router";
 import axios from "axios";
 import React from "react";
 import cookie from "react-cookies";
@@ -15,7 +15,7 @@ export default class Login extends React.Component {
   }
 
   handleChange = (e) => {
-    this.setState({ [e.target.name]: e.target.value });
+    this.setState({ [e.target.id]: e.target.value });
   };
 
   handleSubmit = (e) => {
@@ -32,7 +32,7 @@ export default class Login extends React.Component {
             alert("User already exists!!! \nTry again");
           } else {
             alert("registered successfully!!!");
-            redirectTo(`${document.location.origin}/login`);
+            navigate('/login');
           }
         });
     } else alert("Password not matching!!!");
@@ -40,37 +40,37 @@ export default class Login extends React.Component {
 
   render() {
     return (
-      <div className="login">
+      <div className="auth">
         <form onSubmit={this.handleSubmit}>
           <input
             type="text"
             value={this.state.fullName}
-            name="fullName"
+            id="fullName"
             onChange={this.handleChange}
             placeholder="full name"
           />
           <input
             type="text"
             value={this.state.username}
-            name="username"
+            id="username"
             onChange={this.handleChange}
             placeholder="username"
           />
           <input
             type="password"
             value={this.state.password}
-            name="password"
+            id="password"
             onChange={this.handleChange}
             placeholder="password"
           />
           <input
             type="text"
             value={this.state.password2}
-            name="password2"
+            id="password2"
             onChange={this.handleChange}
             placeholder="re-enter password"
           />
-          <input type="submit" />
+          <input type="submit" value='register' />
         </form>
         <Link to="/login">LogIn</Link>
       </div>
@@ -78,6 +78,6 @@ export default class Login extends React.Component {
   }
 
   componentDidMount() {
-    if (cookie.load("userId")) redirectTo(`${document.location.origin}/home`);
+    if (cookie.load("userId")) navigate('/home');
   }
 }

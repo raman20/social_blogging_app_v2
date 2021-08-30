@@ -28,16 +28,17 @@ export default class UserProfile extends React.Component {
   fetchFollowers = () => {
     axios
       .get(
-        `/user/${this.props.uname}/followers`
+        `/user/${this.state.userData.id}/followers`
       )
       .then((res) => {
         this.setState({ followers: res.data });
       });
   };
+
   fetchFollowing = () => {
     axios
       .get(
-        `/user/${this.props.uname}/followings`
+        `/user/${this.state.userData.id}/followings`
       )
       .then((res) => {
         this.setState({ following: res.data });
@@ -45,7 +46,7 @@ export default class UserProfile extends React.Component {
   };
 
   editProfile = () => {
-    navigate(`${document.location.origin}/u/${this.props.id}/edit`);
+    navigate(`/u/${this.state.userData.id}/edit`);
   };
 
   render() {
@@ -86,8 +87,6 @@ export default class UserProfile extends React.Component {
 
   componentDidMount() {
     this.fetchUserData();
-    this.fetchFollowers();
-    this.fetchFollowing();
   }
 }
 
@@ -95,7 +94,7 @@ class FollowButton extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
-      followFlag: null
+      followFlag: ''
     };
   }
 
@@ -109,7 +108,8 @@ class FollowButton extends React.Component {
           if (res === "success") {
             if (this.state.followFlag === "Follow")
               this.setState({ followFlag: "Unfollow" });
-            else this.setState({ followFlag: "Follow" });
+            else
+              this.setState({ followFlag: "Follow" });
             alert(`${this.state.followFlag}ed successfully`);
           }
         });
@@ -128,7 +128,9 @@ class FollowButton extends React.Component {
   }
 
   componentDidMount() {
-    if (this.props.followed) this.setState({ followFlag: "Unfollow" });
-    else this.setState({ followFlag: "Follow" });
+    if (this.props.followed)
+      this.setState({ followFlag: "Unfollow" });
+    else
+      this.setState({ followFlag: "Follow" });
   }
 }

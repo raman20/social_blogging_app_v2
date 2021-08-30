@@ -39,18 +39,8 @@ export default class App extends React.Component {
 
 	componentDidMount() {
 		if (cookie.load("userId")) {
-			navigate('/home');
+			navigate(`${document.location}`);
 		} else navigate('/login');
 	}
 }
 
-class AuthCheck extends React.Component {
-	render() {
-		return null;
-	}
-	componentDidMount() {
-		if (cookie.load("userId")) {
-			navigate('/home');
-		} else navigate('/login');
-	}
-}

@@ -9,7 +9,7 @@ export default class UserProfile extends React.Component {
     super(props);
     this.state = {
       userData: {
-        posts: []
+        posts: [],
       },
       followers: [],
       following: []
@@ -72,9 +72,7 @@ export default class UserProfile extends React.Component {
               <p>{this.state.userData.bio}</p>
             </div>
             <FollowButton
-              userId={this.state.userData.id}
-              userName={this.props.uname}
-              followed={this.state.userData.followed}
+              userData={this.state.userData}
             />
             <div>{editButton}</div>
           </div>
@@ -98,39 +96,43 @@ class FollowButton extends React.Component {
     };
   }
 
+  static getDerivedStateFromProps(props, state) {
+    if (state.followFlag === '' && props.userData.followed !== undefined) {
+      if (props.userData.followed) {
+        return { followFlag: 'Unfollow' };
+      } else {
+        return { followFlag: 'Follow' };
+      }
+    }
+  }
+
   handleFollow = () => {
     if (cookie.load("userId")) {
       axios
         .post(
-          `/follow/${this.props.userId}`
+          `/follow/${this.props.userData.id}`
         )
         .then((res) => {
-          if (res === "success") {
-            if (this.state.followFlag === "Follow")
+          if (res.data === "success") {
+            alert(`${this.state.followFlag}ed successfully`)
+            if (this.state.followFlag === "Follow") {
               this.setState({ followFlag: "Unfollow" });
-            else
+            } else {
               this.setState({ followFlag: "Follow" });
-            alert(`${this.state.followFlag}ed successfully`);
+            }
           }
         });
     } else {
-      alert("please login to follow");
-      navigate(`${document.location.origin}/login`);
+      alert("please login to follow!!!");
+      navigate('/login');
     }
   };
 
   render() {
     let followButton =
-      cookie.load("userName") === this.props.userName ? null : (
+      cookie.load("userName") === this.props.userData.uname ? null : (
         <button onClick={this.handleFollow}>{this.state.followFlag}</button>
       );
     return <div>{followButton}</div>;
-  }
-
-  componentDidMount() {
-    if (this.props.followed)
-      this.setState({ followFlag: "Unfollow" });
-    else
-      this.setState({ followFlag: "Follow" });
   }
 }

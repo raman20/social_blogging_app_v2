@@ -345,11 +345,11 @@ app.get('/user/search/:uname', async (req, res) => {
 
         let result = await db.query('select id from users where uname=$1', [uname]);
         if (result.rowCount > 0) {
-            res.json({ id: result.rows[0].uname })
+            res.end('success');
         }
         else res.end('not_found');
     }
-    else res.json({ result: "auth_error" });
+    else res.end("auth_error");
 })
 
 app.get('/user/:id/followings', async (req, res) => {

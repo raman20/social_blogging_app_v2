@@ -3,6 +3,7 @@ import cookie from "react-cookies";
 import axios from "axios";
 import PostList from "../post_utils/post_list";
 import { navigate } from "@reach/router";
+import Header from "../header/header";
 
 export default class UserProfile extends React.Component {
   constructor(props) {
@@ -52,33 +53,37 @@ export default class UserProfile extends React.Component {
   render() {
     let editButton =
       cookie.load("userName") === this.props.uname ? (
-        <button onClick={this.editProfile}>Edit</button>
+        <button className='edit_btn' onClick={this.editProfile}>Edit</button>
       ) : null;
+
     return (
-      <div>
-        <div>
-          <div>
-            <img src={this.state.userData.dp} alt="user profile" />
-          </div>
-          <div>
-            <h3>@{this.state.userData.uname}</h3>
-            <div>
-              <b>{this.state.userData.posts.length} posts</b>
-              <b>{this.state.followers.length} followers</b>
-              <b>{this.state.following.length} followings</b>
+      <div className='user_profile_page'>
+        <Header />
+        <div className='user_profile'>
+          <div className='user_details'>
+            <div className='user_dp'>
+              <img src={this.state.userData.dp} alt="user profile" />
             </div>
-            <div>
-              <b>{this.state.userData.fname}</b>
-              <p>{this.state.userData.bio}</p>
+            <div className='user_meta'>
+              <h3>@{this.state.userData.uname}</h3>
+              <div className='user_meta_1'>
+                <b>{this.state.userData.posts.length} posts</b>
+                <b>{this.state.followers.length} followers</b>
+                <b>{this.state.following.length} followings</b>
+              </div>
+              <div className='user_meta_2'>
+                <b>{this.state.userData.fname}</b>
+                <p>{this.state.userData.bio}</p>
+              </div>
+              <div className='user_profile_btn'>
+                <FollowButton userData={this.state.userData} />
+                {editButton}
+              </div>
             </div>
-            <FollowButton
-              userData={this.state.userData}
-            />
-            <div>{editButton}</div>
           </div>
+          <hr></hr>
+          <PostList postFeedData={this.state.userData.posts} />
         </div>
-        <hr></hr>
-        <PostList postFeedData={this.state.userData.posts} />
       </div>
     );
   }
@@ -131,7 +136,7 @@ class FollowButton extends React.Component {
   render() {
     let followButton =
       cookie.load("userName") === this.props.userData.uname ? null : (
-        <button onClick={this.handleFollow}>{this.state.followFlag}</button>
+        <button className='follow_btn' onClick={this.handleFollow}>{this.state.followFlag}</button>
       );
     return <div>{followButton}</div>;
   }

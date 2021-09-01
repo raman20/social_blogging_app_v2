@@ -1,5 +1,6 @@
 import axios from "axios";
 import React from "react";
+import Header from "../header/header";
 import Post from "./post";
 
 export default class MainPost extends React.Component {
@@ -22,7 +23,12 @@ export default class MainPost extends React.Component {
     if (this.state.postData === "not_found") {
       return <h1>Post Not Found!!!</h1>;
     }
-    return <Post postData={this.state.postData} isMainPost={true} />;
+    return (
+      <div className='main_post_page'>
+        <Header />
+        <Post postData={this.state.postData} isMainPost={true} />
+      </div>
+    );
   }
 
   componentDidMount() {

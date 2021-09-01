@@ -3,6 +3,7 @@ import React from "react";
 import axios from "axios";
 import { navigate } from "@reach/router";
 import ImageKit from "imagekit-javascript";
+import Header from "../header/header";
 
 export default class UserEdit extends React.Component {
   constructor(props) {
@@ -92,32 +93,35 @@ export default class UserEdit extends React.Component {
 
   render() {
     return (
-      <div className="user_edit">
-        <form onSubmit={this.handleSubmit}>
-          <input type="file" accept="image/*" onChange={this.handleNewImage} />
-          <input
-            type="text"
-            value={this.state.newName}
-            placeholder=" new name"
-            onChange={this.handleChange}
-            id="newName"
-          />
-          <label>
+      <div className='user_edit_page'>
+        <Header />
+        <div className="user_edit">
+          <form onSubmit={this.handleSubmit}>
+            <input type="file" accept="image/*" onChange={this.handleNewImage} />
             <input
-              type="checkbox"
-              value={this.state.deleteDp}
+              type="text"
+              value={this.state.newName}
+              placeholder=" new name"
               onChange={this.handleChange}
-              id="deleteDp"
-            /> delete Dp
-          </label>
-          <textarea
-            value={this.state.newBio}
-            onChange={this.handleChange}
-            id="newBio"
-            placeholder=' Bio...'
-          ></textarea>
-          <input type="submit" value="apply" />
-        </form>
+              id="newName"
+            />
+            <label>
+              <input
+                type="checkbox"
+                value={this.state.deleteDp}
+                onChange={this.handleChange}
+                id="deleteDp"
+              /> delete Dp
+            </label>
+            <textarea
+              value={this.state.newBio}
+              onChange={this.handleChange}
+              id="newBio"
+              placeholder=' Bio...'
+            ></textarea>
+            <input type="submit" value="apply" />
+          </form>
+        </div>
       </div>
     );
   }

@@ -8,7 +8,6 @@ import MainPost from "./components/post_utils/main_post";
 import UserProfile from "./components/user_profile/user_profile";
 import PostEdit from "./components/edits/post_edit";
 import UserEdit from "./components/edits/user_edit";
-import Header from "./components/header/header";
 
 export default class App extends React.Component {
 	constructor(props) {
@@ -22,10 +21,9 @@ export default class App extends React.Component {
 
 	render() {
 		return (
-			<>
-				{this.state.auth ? <Header setAuth={this.setAuth} /> : null}
+			<div className='app'>
 				<Router>
-					<Login setAuth={this.setAuth} path="/login" />
+					<Login path="/login" />
 					<Register path="/register" />
 					<Home path="/home" />
 					<MainPost path="/p/:pid" />
@@ -33,14 +31,21 @@ export default class App extends React.Component {
 					<UserEdit path="/u/:id/edit" />
 					<PostEdit path="/p/:pid/edit" />
 				</Router>
-			</>
+			</div>
 		);
 	}
 
 	componentDidMount() {
 		if (cookie.load("userId")) {
-			navigate(`${document.location}`);
-		} else navigate('/login');
+			if (document.location.pathname === '/') {
+				navigate('/home');
+			} else {
+				navigate(`${document.location}`);
+			}
+		} else {
+			navigate('/login');
+		}
+
 	}
 }
 

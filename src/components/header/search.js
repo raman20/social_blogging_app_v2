@@ -6,16 +6,17 @@ export default class Search extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
-      searchVal: null
+      searchVal: ''
     };
   }
 
-  handleSubmit = () => {
+  handleSubmit = (e) => {
+    e.preventDefault();
     axios.get(`/user/search/${this.state.searchVal}`)
       .then((res) => {
         if (res.data === "not_found") alert("user not found!!!");
         else {
-          navigate(`/u/${res.data.uname}`);
+          navigate(`/u/${this.state.searchVal}`);
         }
       });
   };

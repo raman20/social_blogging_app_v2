@@ -25,7 +25,6 @@ export default class Login extends React.Component {
       })
       .then((res) => {
         if (res.data === "success") {
-          this.props.setAuth(1);
           navigate('/home');
         }
         else if (res.data === "auth_error")

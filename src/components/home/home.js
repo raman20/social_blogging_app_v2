@@ -3,6 +3,7 @@ import cookie from "react-cookies";
 import axios from "axios";
 import React from "react";
 import PostList from "../post_utils/post_list";
+import Header from "../header/header"
 
 export default class Home extends React.Component {
   constructor(props) {
@@ -32,10 +33,11 @@ export default class Home extends React.Component {
 
   render() {
     return (
-      <>
+      <div className='home'>
+        <Header />
         <PostList postFeedData={this.state.postFeed} />
         <button onClick={this.fetchFeed}>load more</button>
-      </>
+      </div>
     );
   }
 

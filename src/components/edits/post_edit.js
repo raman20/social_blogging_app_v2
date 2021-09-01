@@ -3,6 +3,7 @@ import axios from "axios";
 import React from "react";
 import cookie from "react-cookies";
 import ImageKit from "imagekit-javascript";
+import Header from "../header/header";
 
 export default class PostEdit extends React.Component {
   constructor(props) {
@@ -95,25 +96,28 @@ export default class PostEdit extends React.Component {
 
   render() {
     return (
-      <div className="user_edit">
-        <form onSubmit={this.handleSubmit}>
-          <input type="file" accept="image/*" onChange={this.handleNewImage} />
-          <label>
-            <input
-              type="checkbox"
-              id='deleteImage'
-              value={this.state.deleteImage}
-              onClick={this.handleImageDelete}
-            /> Delete Image
-          </label>
-          <textarea
-            id='newPost'
-            value={this.state.newPost}
-            onChange={this.handlePost}
-          ></textarea>
-          <input type="submit" value="save" />
-        </form>
-        <button onClick={this.deletePost}> DELETE POST </button>
+      <div className='post_edit_page'>
+        <Header />
+        <div className="post_edit">
+          <form onSubmit={this.handleSubmit}>
+            <input type="file" accept="image/*" onChange={this.handleNewImage} />
+            <label>
+              <input
+                type="checkbox"
+                id='deleteImage'
+                value={this.state.deleteImage}
+                onClick={this.handleImageDelete}
+              /> Delete Image
+            </label>
+            <textarea
+              id='newPost'
+              value={this.state.newPost}
+              onChange={this.handlePost}
+            ></textarea>
+            <input type="submit" value="save" />
+          </form>
+          <button onClick={this.deletePost}> DELETE POST </button>
+        </div>
       </div>
     );
   }

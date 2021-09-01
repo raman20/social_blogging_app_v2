@@ -7,9 +7,9 @@ export default class Nav extends React.Component {
   render() {
     return cookie.load("userId") ? (
       <nav>
-        <Link to="home">Home</Link>
-        <Link to={`u/${cookie.load("userName")}`}>Profile</Link>
-        <Logout setAuth={this.props.setAuth} />
+        <Link to="/home">Home</Link>
+        <Link to={`/u/${cookie.load("userName")}`}>Profile</Link>
+        <Logout />
       </nav>
     ) : null;
   }
@@ -21,7 +21,6 @@ class Logout extends React.Component {
       .get("/user/logout")
       .then((res) => {
         if (res.data === "success") {
-          this.props.setAuth(0);
           navigate("/login");
         }
       });

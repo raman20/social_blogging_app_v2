@@ -49,7 +49,6 @@ app.post('/user/login', async (req, res) => {
         if (output) {
             res.cookie('userId', result.rows[0].id);
             res.cookie('userName', result.rows[0].uname);
-            console.log('\n\nhello\n\n')
             res.end("success");
         }
         else {

@@ -88,6 +88,12 @@ export default class UserProfile extends React.Component {
     );
   }
 
+  componentDidUpdate(prevProps, prevState) {
+    if(prevProps.uname !== this.props.uname) {
+      this.fetchUserData();
+    }
+  }
+
   componentDidMount() {
     this.fetchUserData();
   }

@@ -59,7 +59,7 @@ export default class LikeList extends React.Component {
 
 class LikeListItem extends React.Component {
   navigateUser = () => {
-    navigate(`${document.location.origin}/u/${this.props.likeData.uname}`);
+    navigate(`/u/${this.props.likeData.uname}`);
   };
   render() {
     return (

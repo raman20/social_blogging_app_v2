@@ -21,7 +21,7 @@ export default class Home extends React.Component {
       )
       .then((res) => {
         if (res.data.length > 0) {
-          this.setState((prevState) => {
+          this.setState((prevState, prevProps) => {
             return {
               postFeed: prevState.postFeed.concat(res.data),
               postFeedOffset: prevState.postFeedOffset + 10

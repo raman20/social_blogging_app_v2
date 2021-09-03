@@ -46,7 +46,7 @@ export default class Post extends React.Component {
 
   render() {
     return (
-      <div>
+      <div style={{border: '1px solid black', marginBottom: '10px'}}>
         <PostHeader
           userData={{
             dp: this.props.postData.dp,

@@ -7,8 +7,9 @@ export default class Nav extends React.Component {
   render() {
     return cookie.load("userId") ? (
       <nav>
-        <Link to="/home">Home</Link>
-        <Link to={`/u/${cookie.load("userName")}`}>Profile</Link>
+        <Link to="/home">Home </Link>
+        <Link to={`/u/${cookie.load("userName")}`}>Profile </Link>
+        <Link to='/new_post'>New Post </Link>
         <Logout />
       </nav>
     ) : null;

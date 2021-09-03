@@ -89,12 +89,12 @@ app.get('/feed/:offset', async (req, res) => {
         let query = `   select p.id, p.pid, p.content, p.media_url, p.likecount, p.commentcount, p.created, u.uname, u.dp 
                         from posts p inner join users u
                         on u.id=p.id
-                        where p.id in ((select followee from follow where follower=$1),$2) 
-                        order by created desc offset $3 limit 20;
+                        where p.id in ((select followee from follow where follower=$1),$1) 
+                        order by created desc offset $2 limit 20;
                     `;
 
-        let result = await db.query(query, [userId, req.cookies['userId'], offset]);
-        res.json(result.rows);
+        let result = await db.query(query, [userId, offset]);
+        res.json(result.rowCount > 0 ? result.rows : []);
     }
 
     else res.end("auth_error");
@@ -117,33 +117,18 @@ app.get('/post/:pid', async (req, res) => {
 
 })
 
-app.post('/post/new', (req, res) => {
+app.post('/post/new', async (req, res) => {
     if (req.cookies['userId']) {
-        let postImage = req.body.image;
-        let postImageType = req.body.imageType;
-        let postText = req.body.text;
+        let { postImageUrl, postImageMediaId, postText } = req.body;
 
-        if (postImage) {
-            imagekit.upload({
-                file: postImage,
-                fileName: `${req.cookies['userId']}_upload.${postImageType}`
-            }, (err, result) => {
-                if (err) {
-                    console.log(err);
-                    res.end('sys_error');
-                }
-                else {
-                    db.query('insert into posts(id, content, media_url, media_id) values($1,$2,$3,$4) returning *;', [req.cookies['userId'], postText, result.url, result.fileId], (err, result) => {
-                        res.json(result.rows[0]);
-                    })
-                }
-            })
+        if (postImageUrl) {
+            await db.query('insert into posts(id, content, media_url, media_id) values($1,$2,$3,$4);', [parseInt(req.cookies['userId']), postText, postImageUrl, postImageMediaId]);
+            res.end('success');
         }
 
         else {
-            db.query('insert into posts(id, content) values($1, $2) returning *;', [req.cookies['userId'], postText], (err, result) => {
-                res.json(result.rows[0]);
-            })
+            await db.query('insert into posts(id, content) values($1, $2);', [parseInt(req.cookies['userId']), postText])
+            res.end('success');
         }
 
     }

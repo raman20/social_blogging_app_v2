@@ -8,6 +8,7 @@ import MainPost from "./components/post_utils/main_post";
 import UserProfile from "./components/user_profile/user_profile";
 import PostEdit from "./components/edits/post_edit";
 import UserEdit from "./components/edits/user_edit";
+import NewPost from "./components/new_post/new_post";
 
 export default class App extends React.Component {
 	constructor(props) {
@@ -30,6 +31,7 @@ export default class App extends React.Component {
 					<UserProfile path="/u/:uname" />
 					<UserEdit path="/u/:id/edit" />
 					<PostEdit path="/p/:pid/edit" />
+					<NewPost path="/new_post" />
 				</Router>
 			</div>
 		);

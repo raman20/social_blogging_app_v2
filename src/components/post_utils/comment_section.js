@@ -44,7 +44,7 @@ export default class CommentSection extends React.Component {
 
   render() {
     return (
-      <div>
+      <div style={{ border: '1px solid red' }}>
         <div>
           {this.state.comments.map((item, index) => {
             return (
@@ -67,6 +67,12 @@ export default class CommentSection extends React.Component {
         </form>
       </div>
     );
+  }
+
+  componentDidUpdate(prevProps, prevState) {
+    if (this.props.id !== prevProps.id && this.props.isMainPost) {
+      this.fetchComments();
+    }
   }
 
   componentDidMount() {

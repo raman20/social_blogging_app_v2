@@ -24,7 +24,7 @@ CREATE TABLE follow (
 CREATE TABLE posts (
     pid serial,                         -- post id
     id integer REFERENCES users(id),    -- user id
-    content text not null,              -- post content
+    content text,                       -- post content
     media_url text default null,        -- media cdn address
     created timestamp default now(),    -- time it is created
     likeCount integer default 0,        -- like count

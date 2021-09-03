@@ -25,9 +25,9 @@ export default class CommentSection extends React.Component {
             comment: this.state.newComment
           }
         )
-        .this((res) => {
+        .then((res) => {
           this.setState((prevState) => {
-            return { newComment: prevState.newComment.unshift(res.data) };
+            return { comments: [res.data, ...prevState.comments] };
           });
         });
     }
@@ -38,7 +38,7 @@ export default class CommentSection extends React.Component {
     axios
       .get(`/comment/${this.props.pid}`)
       .then((res) => {
-        this.state({ comments: res.data });
+        this.setState({ comments: res.data });
       });
   };
 
@@ -70,12 +70,12 @@ export default class CommentSection extends React.Component {
   }
 
   componentDidUpdate(prevProps, prevState) {
-    if (this.props.id !== prevProps.id && this.props.isMainPost) {
+    if (this.props.pid !== prevProps.pid && this.props.isMainPost) {
       this.fetchComments();
     }
   }
 
   componentDidMount() {
-    if (this.props.isMainPost) this.fetchComments();
+    if (this.props.isMainPost && this.props.pid) this.fetchComments();
   }
 }

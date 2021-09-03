@@ -46,7 +46,7 @@ export default class Post extends React.Component {
 
   render() {
     return (
-      <div style={{border: '1px solid black', marginBottom: '10px'}}>
+      <div style={{ border: '1px solid black', marginBottom: '10px' }}>
         <PostHeader
           userData={{
             dp: this.props.postData.dp,
@@ -78,10 +78,18 @@ export default class Post extends React.Component {
     );
   }
 
+  componentDidUpdate(prevProps) {
+    if(prevProps.postData.likecount!== this.props.postData.likecount || prevProps.postData.commentcount !== this.props.postData.commentcount)
+    this.setState({
+      likeCount: this.props.postData.likecount,
+      commentCount: this.props.postData.commentcount
+    });
+  }
+
   componentDidMount() {
     this.setState({
-      likeCount: this.props.postData.likeCount,
-      commentCount: this.props.postData.commentCount
+      likeCount: this.props.postData.likecount,
+      commentCount: this.props.postData.commentcount
     });
   }
 }
@@ -135,12 +143,13 @@ class PostOptions extends React.Component {
   };
 
   options =
-    cookie.load("userId") === this.props.userId ? (
+    cookie.load("userId") == this.props.userId ? (
       <>
         <b onClick={this.postDelete}>delete</b>
         <b onClick={this.postEdit}>Edit</b>
       </>
     ) : null;
+
   render() {
     return <div>{this.options}</div>;
   }

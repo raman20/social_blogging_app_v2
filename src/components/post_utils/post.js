@@ -3,7 +3,6 @@ import Like from "./like_button";
 import LikeList from "./like_list";
 import CommentSection from "./comment_section";
 import cookie from "react-cookies";
-import axios from "axios";
 import { navigate } from "@reach/router";
 
 export default class Post extends React.Component {
@@ -79,17 +78,22 @@ export default class Post extends React.Component {
   }
 
   componentDidUpdate(prevProps) {
-    if(prevProps.postData.likecount!== this.props.postData.likecount || prevProps.postData.commentcount !== this.props.postData.commentcount)
-    this.setState({
-      likeCount: this.props.postData.likecount,
-      commentCount: this.props.postData.commentcount
-    });
+    if (prevProps.postData.likecount !== this.props.postData.likecount ||
+      prevProps.postData.commentcount !== this.props.postData.commentcount ||
+      prevProps.postData.likeflag !== this.props.postData.likeflag) {
+      this.setState({
+        likeCount: this.props.postData.likecount,
+        commentCount: this.props.postData.commentcount,
+        likeFlag: this.props.postData.likeflag ? true : false
+      });
+    }
   }
 
   componentDidMount() {
     this.setState({
       likeCount: this.props.postData.likecount,
-      commentCount: this.props.postData.commentcount
+      commentCount: this.props.postData.commentcount,
+      likeFlag: this.props.postData.likeflag ? true : false
     });
   }
 }
@@ -125,32 +129,12 @@ class PostBody extends React.Component {
 }
 
 class PostOptions extends React.Component {
-  postDelete = () => {
-    axios
-      .delete(
-        `/post/delete/${this.props.pid}`
-      )
-      .then((res) => {
-        if (res.data === "success") {
-          alert("post deleted successfully");
-          navigate(`${document.location.origin}/home`);
-        }
-      });
-  };
-
   postEdit = () => {
-    navigate(`${document.location.origin}/p/${this.props.userId}/edit`);
+    navigate(`/p/${this.props.pid}/edit`);
   };
-
-  options =
-    cookie.load("userId") == this.props.userId ? (
-      <>
-        <b onClick={this.postDelete}>delete</b>
-        <b onClick={this.postEdit}>Edit</b>
-      </>
-    ) : null;
 
   render() {
-    return <div>{this.options}</div>;
+    let options = cookie.load("userId") == this.props.userId ? <b onClick={this.postEdit}>Edit</b> : null;
+    return <div>{options}</div>;
   }
 }

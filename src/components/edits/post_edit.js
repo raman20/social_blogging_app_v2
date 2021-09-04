@@ -12,7 +12,7 @@ export default class PostEdit extends React.Component {
       newPost: '',
       newImage: null,
       newImageName: '',
-      ImageDeleteFlag: false
+      deleteImage: false
     };
     this.imagekit = new ImageKit({
       publicKey: "public_BA4Pcimv5MNjuSgVgorpdDADpyc=",
@@ -27,14 +27,14 @@ export default class PostEdit extends React.Component {
         return {
           newImage: null,
           newImageName: '',
-          deleteImage: !prevState.deleteImage
+          deleteImage: !prevState.deleteImage,
         };
       });
     } else this.setState({ [e.target.id]: e.target.value });
   };
 
   handleNewImage = (e) => {
-    if (!this.state.ImageDeleteFlag) {
+    if (!this.state.deleteImage) {
       let file = e.target.files[0];
       let fileType = file.name.split(".").pop();
       let fileName = `${cookie.load('userName')}_${this.props.pip}.${fileType}`;
@@ -106,13 +106,13 @@ export default class PostEdit extends React.Component {
                 type="checkbox"
                 id='deleteImage'
                 value={this.state.deleteImage}
-                onClick={this.handleImageDelete}
+                onClick={this.handleChange}
               /> Delete Image
             </label>
             <textarea
               id='newPost'
               value={this.state.newPost}
-              onChange={this.handlePost}
+              onChange={this.handleChange}
             ></textarea>
             <input type="submit" value="save" />
           </form>

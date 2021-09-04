@@ -40,7 +40,7 @@ app.post('/user/register', async (req, res) => {
 app.post('/user/login', async (req, res) => {
     const { username, password } = req.body;
 
-    let query = 'select id, uname, passwd from users where uname=$1';
+    let query = 'SELECT id, uname, passwd FROM users WHERE uname=$1';
 
     let result = await db.query(query, [username]);
     if (result.rows.length > 0) {
@@ -76,7 +76,7 @@ app.put('/password_rest', async (req, res) => {
     let { new_passwd } = req.body;
     let hashedPasswd = await crypto.hash(new_passwd, 10);
 
-    await db.query("update users set passwd=$1", [hashedPasswd]);
+    await db.query("UPDATE users SET passwd=$1", [hashedPasswd]);
     res.end("success");
 })
 //----------------------------------------------------------------
@@ -86,11 +86,12 @@ app.get('/feed/:offset', async (req, res) => {
         let userId = parseInt(req.cookies['userId']);
         let offset = parseInt(req.params.offset);
 
-        let query = `   select p.id, p.pid, p.content, p.media_url, p.likecount, p.commentcount, p.created, u.uname, u.dp 
-                        from posts p inner join users u
-                        on u.id=p.id
-                        where p.id in ((select followee from follow where follower=$1),$1) 
-                        order by created desc offset $2 limit 20;
+        let query = `   SELECT p.id, p.pid, p.content, p.media_url, p.likecount, p.commentcount, p.created, u.uname, u.dp, 
+                        COALESCE((SELECT id FROM likes WHERE pid=p.pid AND id=$1),0) as likeflag
+                        FROM posts p 
+                        INNER JOIN users u ON u.id=p.id
+                        WHERE p.id IN ((SELECT followee FROM follow WHERE follower=$1),$1) 
+                        ORDER BY created DESC OFFSET $2 LIMIT 20;
                     `;
 
         let result = await db.query(query, [userId, offset]);
@@ -104,11 +105,14 @@ app.get('/post/:pid', async (req, res) => {
 
     if (req.cookies['userId']) {
         let pid = parseInt(req.params.pid);
-
-        let result = await db.query("select * from posts where pid=$1", [pid]);
-        if (result.rows.length > 0) res.json(result.rows[0]);
+        let query = `   SELECT p.id, p.pid, p.content, p.media_url, p.likecount, p.commentcount, p.created, u.uname, u.dp, 
+                        COALESCE((SELECT id FROM likes WHERE pid=p.pid AND id=$1),0) as likeflag
+                        FROM posts p INNER JOIN users u ON u.id=p.id
+                        WHERE p.pid=$2
+                    `;
+        let result = await db.query(query, [parseInt(req.cookies['userId']), pid]);
+        if (result.rowCount > 0) res.json(result.rows[0]);
         else res.end('not_found');
-
     }
 
     else {
@@ -122,12 +126,12 @@ app.post('/post/new', async (req, res) => {
         let { postImageUrl, postImageMediaId, postText } = req.body;
 
         if (postImageUrl) {
-            await db.query('insert into posts(id, content, media_url, media_id) values($1,$2,$3,$4);', [parseInt(req.cookies['userId']), postText, postImageUrl, postImageMediaId]);
+            await db.query('INSERT INTO posts(id, content, media_url, media_id) values($1,$2,$3,$4);', [parseInt(req.cookies['userId']), postText, postImageUrl, postImageMediaId]);
             res.end('success');
         }
 
         else {
-            await db.query('insert into posts(id, content) values($1, $2);', [parseInt(req.cookies['userId']), postText])
+            await db.query('INSERT INTO posts(id, content) values($1, $2);', [parseInt(req.cookies['userId']), postText])
             res.end('success');
         }
 
@@ -142,8 +146,8 @@ app.post('/comment/:pid', async (req, res) => {
         let { comment } = req.body;
         let { pid } = req.params;
         let query = `
-                    insert into comments(id,pid,comment) values($1,$2,$3) returning 
-                    cid,pid,id,comment,created,(select uname from users where id=$1),(select dp from users where id=$1)
+                    INSERT INTO comments(id,pid,comment) values($1,$2,$3) returning 
+                    cid,pid,id,comment,created,(SELECT uname FROM users WHERE id=$1),(SELECT dp FROM users WHERE id=$1)
                     `
         let result = await db.query(query, [parseInt(req.cookies['userId']), parseInt(pid), comment]);
         res.json(result.rows[0]);
@@ -155,8 +159,8 @@ app.get('/comment/:pid', async (req, res) => {
     if (req.cookies['userId']) {
         let { pid } = req.params;
         let query = `
-                    select c.cid, c.pid, c.comment, c.created, u.id, u.uname, u.dp 
-                    from comments c inner join users u on c.id=u.id where c.pid=$1;
+                    SELECT c.cid, c.pid, c.comment, c.created, u.id, u.uname, u.dp 
+                    FROM comments c INNER JOIN users u ON c.id=u.id WHERE c.pid=$1;
                     `
         let result = await db.query(query, [parseInt(pid)]);
         res.json(result.rows);
@@ -171,7 +175,7 @@ app.put('/post/:pid/edit', async (req, res) => {
         let { newImageUrl, newImageId, newPost, deleteImage } = req.body;
 
         if (newImageUrl || deleteImage) {
-            let result = await db.query('select media_id from posts where pid=$1', [pid]);
+            let result = await db.query('SELECT media_id FROM posts WHERE pid=$1', [pid]);
             let media_id = result.rows.length > 0 ? result.rows[0].media_id : null;
 
             if (media_id) {
@@ -179,16 +183,16 @@ app.put('/post/:pid/edit', async (req, res) => {
             }
 
             if (newImageUrl) {
-                await db.query('update posts set media_url=$1, media_id=$2, content=$3 where pid=$4', [newImageUrl, newImageId, newPost, pid])
+                await db.query('UPDATE posts SET media_url=$1, media_id=$2, content=$3 WHERE pid=$4', [newImageUrl, newImageId, newPost, pid])
                 res.end('success');
             } else {
-                await db.query("update posts set media_url='', media_id='', content=$1 where pid=$2", [newPost, pid]);
+                await db.query("UPDATE posts SET media_url='', media_id='', content=$1 WHERE pid=$2", [newPost, pid]);
                 res.end('success');
             }
         }
 
         else {
-            await db.query('update posts set content=$1 where pid=$2', [newPost, pid]);
+            await db.query('UPDATE posts SET content=$1 WHERE pid=$2', [newPost, pid]);
             res.end('success');
         }
     }
@@ -203,7 +207,7 @@ app.put('/user/edit', async (req, res) => {
         let { newName, newDpUrl, newDpId, newBio, deleteDp } = req.body;
 
         if (newDpUrl || deleteDp) {
-            let result = await db.query('select dp_file_id from users where id=$1', [id]);
+            let result = await db.query('SELECT dp_file_id FROM users WHERE id=$1', [id]);
             let media_id = result.rows[0].dp_file_id;
 
             if (media_id) {
@@ -211,17 +215,17 @@ app.put('/user/edit', async (req, res) => {
             }
 
             if (newDpUrl) {
-                await db.query('update users set dp=$1, dp_file_id=$2, bio=$3 ,fname=$4 where id=$5', [newDpUrl, newDpId, newBio, newName, id])
+                await db.query('UPDATE users SET dp=$1, dp_file_id=$2, bio=$3 ,fname=$4 WHERE id=$5', [newDpUrl, newDpId, newBio, newName, id])
                 res.end("success");
             } else {
                 let defaultDp = 'https://ik.imagekit.io/2bb11e1dc25c4278b3c4/dp.jpeg?updatedAt=1627287903195';
-                await db.query("update users set dp=$1, dp_file_id='', bio=$2, fname=$3 where id=$4", [defaultDp, newBio, newName, id]);
+                await db.query("UPDATE users SET dp=$1, dp_file_id='', bio=$2, fname=$3 WHERE id=$4", [defaultDp, newBio, newName, id]);
                 res.end("success");
             }
         }
 
         else {
-            await db.query('update users set bio=$1, fname=$2 where id=$3', [newBio, newName, id]);
+            await db.query('UPDATE users SET bio=$1, fname=$2 WHERE id=$3', [newBio, newName, id]);
             res.end('success');
         }
     }
@@ -233,17 +237,17 @@ app.post('/like/:pid', async (req, res) => {
     if (req.cookies['userId']) {
         let pid = parseInt(req.params.pid);
 
-        let result = await db.query("select count(1) from likes where pid=$1 and id=$2", [pid, parseInt(req.cookies['userId'])]);
+        let result = await db.query("SELECT count(1) FROM likes WHERE pid=$1 AND id=$2", [pid, parseInt(req.cookies['userId'])]);
 
         // dislike
         if (result.rows[0].count === '1') {
-            await db.query("delete from likes where pid=$1 and id=$2", [pid, parseInt(req.cookies['userId'])]);
+            await db.query("delete FROM likes WHERE pid=$1 AND id=$2", [pid, parseInt(req.cookies['userId'])]);
             res.end("success");
         }
 
         // like
         else {
-            await db.query("insert into likes(pid, id) values($1,$2)", [pid, parseInt(req.cookies['userId'])]);
+            await db.query("INSERT INTO likes(pid, id) values($1,$2)", [pid, parseInt(req.cookies['userId'])]);
             res.end("success");
         }
 
@@ -256,8 +260,8 @@ app.get('/like/:pid', async (req, res) => {
     if (req.cookies['userId']) {
         let { pid } = req.params;
         let query = `
-                        select dp, uname, id from users 
-                        where id in (select id from likes where pid=$1);
+                        SELECT dp, uname, id FROM users 
+                        WHERE id IN (SELECT id FROM likes WHERE pid=$1);
                     `;
 
         let result = await db.query(query, [parseInt(pid)]);
@@ -270,17 +274,17 @@ app.post('/follow/:id', async (req, res) => {
     if (req.cookies['userId']) {
         let { id: followeeId } = req.params;
 
-        let result = await db.query('select count(1) from follow where follower=$1 and followee=$2', [parseInt(req.cookies['userId']), parseInt(followeeId)]);
+        let result = await db.query('SELECT count(1) FROM follow WHERE follower=$1 AND followee=$2', [parseInt(req.cookies['userId']), parseInt(followeeId)]);
 
         if (result.rows[0].count === '1') {
             //unfollow
-            await db.query('delete from follow where follower=$1 and followee=$2', [parseInt(req.cookies['userId']), parseInt(followeeId)]);
+            await db.query('delete FROM follow WHERE follower=$1 AND followee=$2', [parseInt(req.cookies['userId']), parseInt(followeeId)]);
             res.end('success');
         }
 
         else {
             //follow
-            await db.query('insert into follow(follower, followee) values($1, $2)', [parseInt(req.cookies['userId']), parseInt(followeeId)]);
+            await db.query('INSERT INTO follow(follower, followee) values($1, $2)', [parseInt(req.cookies['userId']), parseInt(followeeId)]);
             res.end('success');
         }
     }
@@ -292,7 +296,7 @@ app.post('/follow/:id', async (req, res) => {
 
 app.get('/user/details', async (req, res) => {
     if (req.cookies['userId']) {
-        let result = await db.query('select fname, bio from users where id=$1', [parseInt(req.cookies['userId'])]);
+        let result = await db.query('SELECT fname, bio FROM users WHERE id=$1', [parseInt(req.cookies['userId'])]);
         res.json(result.rows[0]);
     }
     else res.end('auth_error');
@@ -303,14 +307,14 @@ app.get('/user/:uname', async (req, res) => {
         let { uname } = req.params;
 
 
-        let result = await db.query('select * from users where uname=$1', [uname]);
+        let result = await db.query('SELECT * FROM users WHERE uname=$1', [uname]);
 
         if (result.rowCount > 0) {
             let user = result.rows[0];
-            result = await db.query('select * from posts where id=$1 order by created desc', [user.id]);
+            result = await db.query('SELECT * FROM posts WHERE id=$1 ORDER BY created DESC', [user.id]);
             user.posts = result.rows.length > 0 ? result.rows : [];
             if (parseInt(req.cookies['userId']) !== user.id) {
-                result = await db.query('select count(1) from follow where follower=$1 and followee=$2', [parseInt(req.cookies['userId']), user.id]);
+                result = await db.query('SELECT count(1) FROM follow WHERE follower=$1 AND followee=$2', [parseInt(req.cookies['userId']), user.id]);
                 user.followed = parseInt(result.rows[0].count);
             }
 
@@ -327,7 +331,7 @@ app.get('/user/search/:uname', async (req, res) => {
     if (req.cookies['userId']) {
         let { uname } = req.params;
 
-        let result = await db.query('select id from users where uname=$1', [uname]);
+        let result = await db.query('SELECT id FROM users WHERE uname=$1', [uname]);
         if (result.rowCount > 0) {
             res.end('success');
         }
@@ -340,7 +344,7 @@ app.get('/user/:id/followings', async (req, res) => {
     if (req.cookies['userId']) {
         let { id } = req.params;
 
-        let result = await db.query('select followee, u.dp, u.uname from follow f inner join users u on f.followee=u.id where follower=$1 ', [parseInt(id)]);
+        let result = await db.query('SELECT followee, u.dp, u.uname FROM follow f INNER JOIN users u ON f.followee=u.id WHERE follower=$1 ', [parseInt(id)]);
 
         res.json(result.rows);
     }
@@ -351,7 +355,7 @@ app.get('/user/:id/followers', async (req, res) => {
     if (req.cookies['userId']) {
         let { id } = req.params;
 
-        let result = await db.query('select followee from follow f inner join users u on f.followee=u.id where followee=$1', [parseInt(id)]);
+        let result = await db.query('SELECT followee FROM follow f INNER JOIN users u ON f.followee=u.id WHERE followee=$1', [parseInt(id)]);
         res.json(result.rows);
     }
     else res.end("auth_error");
@@ -360,9 +364,12 @@ app.get('/user/:id/followers', async (req, res) => {
 app.delete('/post/delete/:pid', async (req, res) => {
     if (req.cookies['userId']) {
         let pid = parseInt(req.params.pid);
-        let { rows } = await db.query('select media_id from posts where pid=$1', [pid]);
+        let { rows } = await db.query('SELECT media_id FROM posts WHERE pid=$1', [pid]);
         imagekit.deleteFile(rows[0].media_id);
-        await db.query('delete from posts where pid=$1 and id=$2', [pid, parseInt(req.cookies['userId'])]);
+        await db.query('delete FROM likes WHERE pid=$1', [pid]);
+        await db.query('delete FROM comments WHERE pid=$1', [pid]);
+        await db.query('delete FROM posts WHERE pid=$1', [pid]);
+
         res.end("success");
     }
     else res.end("auth_error");
@@ -370,8 +377,8 @@ app.delete('/post/delete/:pid', async (req, res) => {
 
 app.get('/post/content/:pid', async (req, res) => {
     if (req.cookies['userId']) {
-        let { rows } = await db.query('select content from posts where pid=$1', [parseInt(req.params.pid)]);
-        res.end(rows[0]);
+        let { rows } = await db.query('SELECT content FROM posts WHERE pid=$1', [parseInt(req.params.pid)]);
+        res.end(rows[0].content);
     }
     else res.end("auth_error");
 })

@@ -1,0 +1,40 @@
+.header {
+    background: white;
+    display: flex;
+    justify-content: space-around;
+
+}
+
+body {
+    background-color: #fafafa;
+}
+.header form, nav {
+    margin-top: 16px;
+}
+
+#search_icon {
+    width: 14px;
+    height: 14px;
+}
+
+#search {
+    background-color: #fafafa;
+    height: 30px;
+    border: 0.5px solid #dbdbdb;
+    border-radius: 5px;
+}
+
+#dp {
+    border-radius: 50%;
+}
+
+#dp, #logout, #new_post {
+    width: 22px;
+    height: 22px;
+}
+
+nav {
+    display: flex;
+    justify-content: space-around;
+    width: 15%;
+}

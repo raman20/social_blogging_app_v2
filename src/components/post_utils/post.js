@@ -11,7 +11,8 @@ export default class Post extends React.Component {
     this.state = {
       likeCount: 0,
       commentCount: 0,
-      likeFlag: false
+      likeFlag: false,
+      likeBtn: "/like_0.png",
     };
   }
 
@@ -20,14 +21,16 @@ export default class Post extends React.Component {
       this.setState((prevState) => {
         return {
           likeCount: prevState.likeCount - 1,
-          likeFlag: !prevState.likeFlag
+          likeFlag: !prevState.likeFlag,
+          likeBtn: "/like_0.png",
         };
       });
     } else {
       this.setState((prevState) => {
         return {
           likeCount: prevState.likeCount + 1,
-          likeFlag: !prevState.likeFlag
+          likeFlag: !prevState.likeFlag,
+          likeBtn: "/like_1.png",
         };
       });
     }
@@ -45,12 +48,12 @@ export default class Post extends React.Component {
 
   render() {
     return (
-      <div style={{ border: '1px solid black', marginBottom: '10px' }}>
+      <div style={{ border: "1px solid black", marginBottom: "10px" }}>
         <PostHeader
           userData={{
             dp: this.props.postData.dp,
             uname: this.props.postData.uname,
-            id: this.props.postData.id
+            id: this.props.postData.id,
           }}
           pid={this.props.postData.pid}
         />
@@ -61,6 +64,7 @@ export default class Post extends React.Component {
         <Like
           handleLikeCount={this.handleLikeCount}
           pid={this.props.postData.pid}
+          likeBtn={this.state.likeBtn}
         />
         <LikeList
           likeCount={this.state.likeCount}
@@ -78,13 +82,16 @@ export default class Post extends React.Component {
   }
 
   componentDidUpdate(prevProps) {
-    if (prevProps.postData.likecount !== this.props.postData.likecount ||
+    if (
+      prevProps.postData.likecount !== this.props.postData.likecount ||
       prevProps.postData.commentcount !== this.props.postData.commentcount ||
-      prevProps.postData.likeflag !== this.props.postData.likeflag) {
+      prevProps.postData.likeflag !== this.props.postData.likeflag
+    ) {
       this.setState({
         likeCount: this.props.postData.likecount,
         commentCount: this.props.postData.commentcount,
-        likeFlag: this.props.postData.likeflag ? true : false
+        likeFlag: this.props.postData.likeflag ? true : false,
+        likeBtn: this.props.postData.likeflag ? "/like_1.png" : "/like_0.png",
       });
     }
   }
@@ -93,7 +100,8 @@ export default class Post extends React.Component {
     this.setState({
       likeCount: this.props.postData.likecount,
       commentCount: this.props.postData.commentcount,
-      likeFlag: this.props.postData.likeflag ? true : false
+      likeFlag: this.props.postData.likeflag ? true : false,
+      likeBtn: this.props.postData.likeflag ? "/like_1.png" : "/like_0.png",
     });
   }
 }
@@ -134,7 +142,10 @@ class PostOptions extends React.Component {
   };
 
   render() {
-    let options = cookie.load("userId") == this.props.userId ? <b onClick={this.postEdit}>Edit</b> : null;
+    let options =
+      cookie.load("userId") == this.props.userId ? (
+        <b onClick={this.postEdit}>Edit</b>
+      ) : null;
     return <div>{options}</div>;
   }
 }

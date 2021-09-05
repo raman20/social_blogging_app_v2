@@ -5,7 +5,7 @@ export default class LikeList extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
-      likes: []
+      likes: [],
     };
 
     this.LikeListRef = React.createRef();
@@ -33,7 +33,7 @@ export default class LikeList extends React.Component {
             display: "none",
             opacity: 0.8,
             zIndex: 2,
-            position: "absolute"
+            position: "absolute",
           }}
           ref={this.LikeListRef}
         >
@@ -48,9 +48,7 @@ export default class LikeList extends React.Component {
           </b>
         </div>
         <div>
-          <u onClick={this.showLikeList}>
-            <b>{this.props.likeCount}</b>
-          </u>
+          <b onClick={this.showLikeList}>{this.props.likeCount} likes</b>
         </div>
       </>
     );

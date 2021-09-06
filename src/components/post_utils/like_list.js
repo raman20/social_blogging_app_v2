@@ -1,6 +1,8 @@
 import axios from "axios";
 import React from "react";
 import { navigate } from "@reach/router";
+import postStyle from "../../component_style/post_utils/post";
+
 export default class LikeList extends React.Component {
   constructor(props) {
     super(props);
@@ -47,9 +49,9 @@ export default class LikeList extends React.Component {
             X{" "}
           </b>
         </div>
-        <div>
-          <b onClick={this.showLikeList}>{this.props.likeCount} likes</b>
-        </div>
+        <b onClick={this.showLikeList} style={postStyle.likeCount}>
+          {this.props.likeCount} likes
+        </b>
       </>
     );
   }

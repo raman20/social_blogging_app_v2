@@ -1,0 +1,43 @@
+.profile {
+  display: flex;
+  flex-direction: column;
+}
+
+.uname {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.user_info {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-evenly;
+}
+
+.user_profile_meta {
+  display: flex;
+  flex-direction: column;
+}
+
+.profile_metrics {
+  display: flex;
+}
+
+.profile_metrics div {
+ margin-left: 10px; 
+}
+
+hr {
+  width: 100%;
+}
+
+.dp img {
+  width: 150px;
+  height: 150px;
+  border-radius: 50%;
+}
+
+.dp {
+  padding-top: 15px 
+}

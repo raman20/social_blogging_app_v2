@@ -1,13 +1,14 @@
 import axios from "axios";
 import React from "react";
 import cookie from "react-cookies";
+import postStyle from "../../component_style/post_utils/post";
 
 export default class CommentSection extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
       newComment: null,
-      comments: []
+      comments: [],
     };
   }
 
@@ -19,51 +20,51 @@ export default class CommentSection extends React.Component {
     e.preventDefault();
     if (cookie.load("userId")) {
       axios
-        .post(
-          `/comment/${this.props.pid}`,
-          {
-            comment: this.state.newComment
-          }
-        )
+        .post(`/comment/${this.props.pid}`, {
+          comment: this.state.newComment,
+        })
         .then((res) => {
           this.setState((prevState) => {
             return { comments: [res.data, ...prevState.comments] };
           });
         });
-    }
-    else alert('Login first to comment !!!');
+    } else alert("Login first to comment !!!");
   };
 
   fetchComments = () => {
-    axios
-      .get(`/comment/${this.props.pid}`)
-      .then((res) => {
-        this.setState({ comments: res.data });
-      });
+    axios.get(`/comment/${this.props.pid}`).then((res) => {
+      this.setState({ comments: res.data });
+    });
   };
 
   render() {
     return (
-      <div style={{ border: '1px solid red' }}>
+      <div style={postStyle.commentSection}>
         <div>
           {this.state.comments.map((item, index) => {
             return (
               <div key={index} index={item.cid}>
-                <img src={item.dp} alt="user" /> <b>{item.uname}</b>
-                <sup>({item.created})</sup>
-                <p>{item.comment}</p>
+                <b>{item.uname}</b> {item.comment}
               </div>
             );
           })}
         </div>
-        <form onSubmit={this.postComment}>
+        <hr />
+        <form onSubmit={this.postComment} style={postStyle.commentSectionForm}>
           <input
             type="text"
-            placeholder=" write your comment..."
+            placeholder=" Add a comment..."
+            id="comment_input"
+            style={postStyle.commentInput}
             value={this.state.newComment}
             onChange={this.handleChange}
           />
-          <input type="submit" value="post" />
+          <input
+            type="image"
+            src="/send.png"
+            style={postStyle.commentButton}
+            alt="post"
+          />
         </form>
       </div>
     );

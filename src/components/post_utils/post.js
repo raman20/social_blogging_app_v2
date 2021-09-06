@@ -4,6 +4,7 @@ import LikeList from "./like_list";
 import CommentSection from "./comment_section";
 import cookie from "react-cookies";
 import { navigate } from "@reach/router";
+import postStyle from "../../component_style/post_utils/post";
 
 export default class Post extends React.Component {
   constructor(props) {
@@ -48,7 +49,7 @@ export default class Post extends React.Component {
 
   render() {
     return (
-      <div style={{ border: "1px solid black", marginBottom: "10px" }}>
+      <div style={postStyle.all}>
         <PostHeader
           userData={{
             dp: this.props.postData.dp,
@@ -61,16 +62,24 @@ export default class Post extends React.Component {
           media_url={this.props.postData.media_url}
           content={this.props.postData.content}
         />
-        <Like
-          handleLikeCount={this.handleLikeCount}
-          pid={this.props.postData.pid}
-          likeBtn={this.state.likeBtn}
-        />
-        <LikeList
-          likeCount={this.state.likeCount}
-          pid={this.props.postData.pid}
-        />
-        <u onClick={this.navigatePost}>{this.state.commentCount} comments</u>
+        <div style={postStyle.postButtons}>
+          <div style={postStyle.likeSection}>
+            <Like
+              handleLikeCount={this.handleLikeCount}
+              pid={this.props.postData.pid}
+              likeBtn={this.state.likeBtn}
+            />
+            <LikeList
+              likeCount={this.state.likeCount}
+              pid={this.props.postData.pid}
+            />
+          </div>
+          <div>
+            <b onClick={this.navigatePost} style={postStyle.commentCount}>
+              View all {this.state.commentCount} comments
+            </b>
+          </div>
+        </div>
         <CommentSection
           commentCount={this.state.commentCount}
           pid={this.props.postData.pid}
@@ -112,13 +121,18 @@ class PostHeader extends React.Component {
   };
   render() {
     return (
-      <div>
-        <img
-          src={this.props.userData.dp}
-          alt="user"
-          onClick={this.navigateUser}
-        />
-        <b onClick={this.navigateUser}>{this.props.userData.uname}</b>
+      <div style={postStyle.postHeader}>
+        <div style={postStyle.postHeaderMeta}>
+          <img
+            src={this.props.userData.dp}
+            alt="user"
+            style={postStyle.postHeaderImg}
+            onClick={this.navigateUser}
+          />
+          <h4 onClick={this.navigateUser} style={postStyle.postHeaderUname}>
+            {this.props.userData.uname}
+          </h4>
+        </div>
         <PostOptions userId={this.props.userData.id} pid={this.props.pid} />
       </div>
     );
@@ -129,8 +143,14 @@ class PostBody extends React.Component {
   render() {
     return (
       <div>
-        <img src={this.props.media_url} alt="post" />
-        <p>{this.props.content}</p>
+        {this.props.media_url ? (
+          <img
+            src={this.props.media_url}
+            alt="post"
+            style={postStyle.postBodyImg}
+          />
+        ) : null}
+        <p style={postStyle.postBodyText}>{this.props.content}</p>
       </div>
     );
   }
@@ -144,7 +164,7 @@ class PostOptions extends React.Component {
   render() {
     let options =
       cookie.load("userId") == this.props.userId ? (
-        <b onClick={this.postEdit}>Edit</b>
+        <button onClick={this.postEdit}>Edit</button>
       ) : null;
     return <div>{options}</div>;
   }

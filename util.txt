@@ -1,9 +1,0 @@
-{
-    "username": "test1",
-    "passwd": "test1"
-}
-
-{
-    "username": "test2",
-    "passwd": "test2"
-}

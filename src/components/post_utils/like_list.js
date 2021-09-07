@@ -1,7 +1,7 @@
 import axios from "axios";
 import React from "react";
 import { navigate } from "@reach/router";
-import postStyle from "../../component_style/post_utils/post";
+import postStyle from "../../component_style/post/post_style";
 
 export default class LikeList extends React.Component {
   constructor(props) {

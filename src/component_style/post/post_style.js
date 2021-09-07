@@ -21,6 +21,7 @@ let postStyle = {
     display: "flex",
     flexDirection: "row",
     alignItems: "center",
+    cursor: "pointer",
   },
 
   postHeaderUname: {
@@ -60,6 +61,7 @@ let postStyle = {
 
   commentCount: {
     fontSize: "14px",
+    cursor: "pointer",
   },
 
   commentSection: {
@@ -87,6 +89,7 @@ let postStyle = {
   },
 
   postList: {
+    marginTop: "30px",
     display: "flex",
     flexDirection: "column",
     alignItems: "center",

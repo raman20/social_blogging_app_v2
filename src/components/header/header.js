@@ -1,7 +1,7 @@
 import React from "react";
 import Search from "./search";
 import Nav from "./nav";
-import headerStyle from "../../component_style/header/header";
+import headerStyle from "../../component_style/header/header_style";
 
 export default class Header extends React.Component {
   render() {

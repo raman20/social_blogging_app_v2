@@ -1,5 +1,5 @@
 import React from "react";
-import postStyle from "../../component_style/post_utils/post";
+import postStyle from "../../component_style/post/post_style";
 import Post from "./post";
 
 export default class PostList extends React.Component {
@@ -14,11 +14,16 @@ export default class PostList extends React.Component {
         <div
           style={{
             textAlign: "center",
+            marginTop: "10px",
           }}
         >
           <h3>No post available!</h3>
           <br />
-          <h3>Follow some people</h3>
+          {this.props.isUserProfile ? (
+            <h3>You haven't posted anything</h3>
+          ) : (
+            <h3>Please Follow some people</h3>
+          )}
         </div>
       );
   }

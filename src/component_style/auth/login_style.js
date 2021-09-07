@@ -30,6 +30,7 @@ let loginStyle = {
     border: "1px solid #0095f6",
     borderRadius: "3px",
     height: "25px",
+    cursor: "pointer",
   },
   registerLink: {
     textDecoration: "none",
@@ -44,7 +45,7 @@ let loginStyle = {
     fontWeight: "bold",
     fontSize: "13px",
     textAlign: "center",
-  }
+  },
 };
 
 export default loginStyle;

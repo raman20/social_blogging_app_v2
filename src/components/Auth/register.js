@@ -2,7 +2,7 @@ import { Link, navigate } from "@reach/router";
 import axios from "axios";
 import React from "react";
 import cookie from "react-cookies";
-import registerStyle from "../../component_style/auth/register";
+import registerStyle from "../../component_style/auth/register_style";
 
 export default class Login extends React.Component {
   constructor(props) {
@@ -21,6 +21,18 @@ export default class Login extends React.Component {
 
   handleSubmit = (e) => {
     e.preventDefault();
+    if (
+      !(
+        this.state.username.length >= 5 &&
+        this.state.password.length >= 5 &&
+        this.state.fullName.length >= 5
+      )
+    ) {
+      alert(
+        "Username, Password and Name must be 5 character long !!!\nPlease Check again"
+      );
+      return;
+    }
     if (this.state.password === this.state.password2) {
       axios
         .post("/user/register", {

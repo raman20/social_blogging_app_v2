@@ -7,6 +7,8 @@ CREATE TABLE users (
     passwd text not null,           -- password
     dp text default 'dp.jpeg',      -- profile display picture
     bio text,                       -- profile bio
+    followerCount int default 0     -- follower count
+    followingCount int default 0    -- following count
     PRIMARY KEY(id)
 );
 
@@ -69,7 +71,7 @@ CREATE TRIGGER like_inc_trigger AFTER INSERT ON likes FOR EACH ROW EXECUTE FUNCT
 
 -----------------------------------
 
--- TRIGGER FOR LIKE COUNT DECREMENT -->
+----------------- TRIGGER FOR LIKE COUNT DECREMENT ------------->
 
 CREATE FUNCTION decrement_like() RETURNS TRIGGER AS
 $$
@@ -82,7 +84,9 @@ LANGUAGE plpgsql;
 
 CREATE TRIGGER like_dec_trigger AFTER DELETE ON likes FOR EACH ROW EXECUTE FUNCTION decrement_like();
 
------------------------------------------
+------------------------------------------------------------------
+
+------------------Trigger for comment count increment-------------
 
 CREATE FUNCTION increment_comment() RETURNS TRIGGER AS
 $$
@@ -94,8 +98,9 @@ $$
 LANGUAGE plpgsql;
 
 CREATE TRIGGER comment_inc_trigger AFTER INSERT ON comments FOR EACH ROW EXECUTE FUNCTION increment_comment();
+--------------------------------------------------------------------
 
-
+------------------Trigger for comment count decrement---------------
 CREATE FUNCTION decrement_comment() RETURNS TRIGGER AS
 $$
 BEGIN
@@ -106,6 +111,59 @@ $$
 LANGUAGE plpgsql;
 
 CREATE TRIGGER comment_dec_trigger AFTER DELETE ON comments FOR EACH ROW EXECUTE FUNCTION decrement_comment();
+---------------------------------------------------------------------
+
+-----------------Trigger for followers count increment---------------
+CREATE FUNCTION increment_follower_count() RETURNS TRIGGER AS
+$$
+BEGIN
+    UPDATE users SET followerCount=followerCount+1 WHERE id=new.followee;
+    RETURN NEW;
+END;
+$$
+LANGUAGE plpgsql;
+
+CREATE TRIGGER increment_follower_count AFTER INSERT ON follow FOR EACH ROW EXECUTE FUNCTION increment_follower_count();
+---------------------------------------------------------------------
+
+-----------------Trigger for followers count decrement---------------
+CREATE FUNCTION decrement_follower_count() RETURNS TRIGGER AS
+$$
+BEGIN
+    UPDATE users SET followerCount=followerCount-1 WHERE id=old.followee;
+    RETURN NEW;
+END;
+$$
+LANGUAGE plpgsql;
+
+CREATE TRIGGER increment_follower_count AFTER DELETE ON follow FOR EACH ROW EXECUTE FUNCTION decrement_follower_count();
+---------------------------------------------------------------------
+
+----------------Trigger for followings count increment---------------
+CREATE FUNCTION increment_following_count() RETURNS TRIGGER AS
+$$
+BEGIN
+    UPDATE users SET followingCount=followingCount+1 WHERE id=new.follower;
+    RETURN NEW;
+END;
+$$
+LANGUAGE plpgsql;
+
+CREATE TRIGGER increment_following_count AFTER INSERT ON follow FOR EACH ROW EXECUTE FUNCTION increment_following_count();
+---------------------------------------------------------------------
+
+----------------Trigger for followings count decrement---------------
+CREATE FUNCTION decrement_following_count() RETURNS TRIGGER AS
+$$
+BEGIN
+    UPDATE users SET followingCount=followingCount-1 WHERE id=old.follower;
+    RETURN NEW;
+END;
+$$
+LANGUAGE plpgsql;
+
+CREATE TRIGGER increment_following_count AFTER DELETE ON follow FOR EACH ROW EXECUTE FUNCTION decrement_following_count();
+---------------------------------------------------------------------
 
 
 -----------------------------------------------------------------------------------------------------

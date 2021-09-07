@@ -1,4 +1,4 @@
-.new_post {
+.user_edit {
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -8,7 +8,7 @@
     padding: 20px;
   }
   
-  .new_post .img_preview {
+  .user_edit .img_preview {
     width: 100px;
     height: 100px; 
   }

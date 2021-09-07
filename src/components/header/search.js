@@ -1,7 +1,7 @@
 import React from "react";
 import axios from "axios";
 import { navigate } from "@reach/router";
-import searchBarStyle from "../../component_style/header/search";
+import searchBarStyle from "../../component_style/header/search_style";
 
 export default class Search extends React.Component {
   constructor(props) {

@@ -7,16 +7,14 @@ export default class MainPost extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
-      postData: {}
+      postData: {},
     };
   }
 
   fetchPostData = () => {
-    axios
-      .get(`/post/${this.props.pid}`)
-      .then((res) => {
-        this.setState({ postData: res.data });
-      });
+    axios.get(`/post/${this.props.pid}`).then((res) => {
+      this.setState({ postData: res.data });
+    });
   };
 
   render() {
@@ -24,9 +22,18 @@ export default class MainPost extends React.Component {
       return <h1>Post Not Found!!!</h1>;
     }
     return (
-      <div className='main_post_page'>
+      <div className="main_post_page">
         <Header />
-        <Post postData={this.state.postData} isMainPost={true} />
+        <div
+          style={{
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center",
+            marginTop: "30px",
+          }}
+        >
+          <Post postData={this.state.postData} isMainPost={true} />
+        </div>
       </div>
     );
   }

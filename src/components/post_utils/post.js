@@ -4,7 +4,7 @@ import LikeList from "./like_list";
 import CommentSection from "./comment_section";
 import cookie from "react-cookies";
 import { navigate } from "@reach/router";
-import postStyle from "../../component_style/post_utils/post";
+import postStyle from "../../component_style/post/post_style";
 
 export default class Post extends React.Component {
   constructor(props) {
@@ -117,7 +117,7 @@ export default class Post extends React.Component {
 
 class PostHeader extends React.Component {
   navigateUser = () => {
-    navigate(`${document.location.origin}/u/${this.props.userData.id}`);
+    navigate(`/u/${this.props.userData.uname}`);
   };
   render() {
     return (

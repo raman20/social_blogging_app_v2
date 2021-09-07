@@ -18,6 +18,9 @@ export default class Like extends React.Component {
       <img
         src={this.props.likeBtn}
         onClick={this.handleLike}
+        style={{
+          cursor: "pointer",
+        }}
         alt="like button"
       />
     );

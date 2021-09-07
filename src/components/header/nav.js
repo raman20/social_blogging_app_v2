@@ -2,7 +2,7 @@ import { Link, navigate } from "@reach/router";
 import axios from "axios";
 import React from "react";
 import cookie from "react-cookies";
-import navStyle from "../../component_style/header/nav";
+import navStyle from "../../component_style/header/nav_style";
 
 export default class Nav extends React.Component {
   render() {

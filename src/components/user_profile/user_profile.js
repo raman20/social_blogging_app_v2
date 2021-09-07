@@ -123,7 +123,11 @@ export default class UserProfile extends React.Component {
   }
 
   componentDidMount() {
-    this.fetchUserData();
+    if (!cookie.load("userId")) {
+      navigate("/login");
+    } else {
+      this.fetchUserData();
+    }
   }
 }
 

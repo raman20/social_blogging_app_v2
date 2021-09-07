@@ -1,4 +1,6 @@
+import { navigate } from "@reach/router";
 import axios from "axios";
+import cookie from "react-cookies";
 import React from "react";
 import Header from "../header/header";
 import Post from "./post";
@@ -39,6 +41,10 @@ export default class MainPost extends React.Component {
   }
 
   componentDidMount() {
-    this.fetchPostData();
+    if (!cookie.load("userId")) {
+      navigate("/login");
+    } else {
+      this.fetchPostData();
+    }
   }
 }

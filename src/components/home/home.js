@@ -53,12 +53,10 @@ export default class Home extends React.Component {
             <img src="/loading.gif" alt="loading indicator" />
           </div>
         ) : (
-          <>
-            <PostList postFeedData={this.state.postFeed} />
-            {this.postFeed.length > 0 ? (
-              <button onClick={this.loadMoreFeed}>load more</button>
-            ) : null}
-          </>
+          <PostList
+            postFeedData={this.state.postFeed}
+            loadMoreFeed={this.loadMoreFeed}
+          />
         )}
       </div>
     );

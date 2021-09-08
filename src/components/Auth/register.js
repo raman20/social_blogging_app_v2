@@ -23,9 +23,9 @@ export default class Login extends React.Component {
     e.preventDefault();
     if (
       !(
-        this.state.username.length >= 5 &&
-        this.state.password.length >= 5 &&
-        this.state.fullName.length >= 5
+        this.state.username.trim().length >= 5 &&
+        this.state.password.trim().length >= 5 &&
+        this.state.fullName.trim().length >= 5
       )
     ) {
       alert(

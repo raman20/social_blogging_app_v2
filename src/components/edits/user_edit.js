@@ -65,6 +65,7 @@ export default class UserEdit extends React.Component {
   handleSubmit = (e) => {
     e.preventDefault();
     if (this.state.newImage) {
+      document.body.style.cursor = "wait";
       this.imagekit.upload(
         {
           file: this.state.newImage,
@@ -79,6 +80,7 @@ export default class UserEdit extends React.Component {
               newName: this.state.newName,
             })
             .then((res) => {
+              document.body.style.cursor = "";
               if (res.data === "success") {
                 alert("User Profile Edited successfully");
                 navigate(`/u/${cookie.load("userName")}`);
@@ -87,6 +89,7 @@ export default class UserEdit extends React.Component {
         }
       );
     } else {
+      document.body.style.cursor = "wait";
       axios
         .put("/user/edit", {
           newName: this.state.newName,
@@ -94,6 +97,7 @@ export default class UserEdit extends React.Component {
           deleteDp: this.state.deleteDp,
         })
         .then((res) => {
+          document.body.style.cursor = "";
           if (res.data === "success") {
             alert("User Profile Edited successfully");
             navigate(`/u/${cookie.load("userName")}`);

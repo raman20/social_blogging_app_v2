@@ -4,7 +4,7 @@ const crypto = require("bcrypt");
 const cookieParser = require("cookie-parser");
 const ImageKit = require("imagekit");
 const app = express();
-const port = process.env.PORT;
+const port = process.env.PORT || 3001;
 
 const imagekit = new ImageKit({
   publicKey: "public_BA4Pcimv5MNjuSgVgorpdDADpyc=",

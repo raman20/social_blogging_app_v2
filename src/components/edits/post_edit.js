@@ -48,6 +48,7 @@ export default class PostEdit extends React.Component {
   handleSubmit = (e) => {
     e.preventDefault();
     if (this.state.newImage) {
+      document.body.style.cursor = "wait";
       this.imagekit.upload(
         {
           file: this.state.newImage,
@@ -61,17 +62,20 @@ export default class PostEdit extends React.Component {
               newPost: this.state.newPost,
             })
             .then((res) => {
+              document.body.style.cursor = "";
               if (res.data === "success") alert("Post Edited successfully");
             });
         }
       );
     } else {
+      document.body.style.cursor = "wait";
       axios
         .put(`/post/${this.props.pid}/edit`, {
-          text: this.state.postText,
+          newPost: this.state.newPost,
           deleteImage: this.state.deleteImage,
         })
         .then((res) => {
+          document.body.style.cursor = "";
           if (res.data === "success") alert("Post Edited successfully");
         });
     }
@@ -86,8 +90,10 @@ export default class PostEdit extends React.Component {
   deletePost = () => {
     let consent = window.confirm("are you sure to delete post");
     if (consent) {
+      document.body.style.cursor = "wait";
       axios.delete(`/post/delete/${this.props.pid}`).then((res) => {
         if (res.data === "success") {
+          document.body.style.cursor = "";
           alert("post deleted successfully");
           navigate("/home");
         }

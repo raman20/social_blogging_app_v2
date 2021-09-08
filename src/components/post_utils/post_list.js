@@ -4,11 +4,27 @@ import Post from "./post";
 
 export default class PostList extends React.Component {
   render() {
+    let loadMoreButton = (
+      <button
+        style={{
+          marginTop: "10px",
+        }}
+        onClick={this.loadMoreFeed}
+      >
+        load more
+      </button>
+    );
+
     if (this.props.postFeedData.length > 0) {
       let postList = this.props.postFeedData.map((item, index) => {
         return <Post key={index} postData={item} isMainPost={false} />;
       });
-      return <div style={postStyle.postList}>{postList}</div>;
+      return (
+        <div style={postStyle.postList}>
+          {postList}
+          {this.props.loadMoreFeed ? loadMoreButton : null}
+        </div>
+      );
     } else
       return (
         <div

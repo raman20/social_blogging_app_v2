@@ -39,7 +39,8 @@ export default class NewPost extends React.Component {
 
   handleSubmit = (e) => {
     e.preventDefault();
-    if (this.state.postText || this.state.postImage) {
+    if (this.state.postText.trim().length > 0 || this.state.postImage) {
+      document.body.style.cursor = "wait";
       if (this.state.postImage) {
         this.imagekit.upload(
           {
@@ -55,6 +56,7 @@ export default class NewPost extends React.Component {
               })
               .then((res) => {
                 if (res.data === "success") {
+                  document.body.style.cursor = "";
                   alert("Yay!!! post created successfully");
                   navigate("/home");
                 }
@@ -68,6 +70,7 @@ export default class NewPost extends React.Component {
           })
           .then((res) => {
             if (res.data === "success") {
+              document.body.style.cursor = "";
               alert("Yay!!! post created successfully");
               navigate("/home");
             }

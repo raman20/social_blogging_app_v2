@@ -19,18 +19,14 @@ export default class Login extends React.Component {
 
   handleSubmit = (e) => {
     e.preventDefault();
-    if (!(this.state.username.length >= 5 && this.state.password.length >= 5)) {
-      alert(
-        "Username and password must be 5 character long !!!\nPlease Check again"
-      );
-      return;
-    }
+    document.body.style.cursor = "wait";
     axios
       .post("/user/login", {
         username: this.state.username,
         password: this.state.password,
       })
       .then((res) => {
+        document.body.style.cursor = "";
         if (res.data === "success") {
           navigate("/home");
         } else if (res.data === "auth_error")

@@ -1,3 +1,4 @@
+import { navigate } from "@reach/router";
 import axios from "axios";
 import React from "react";
 import cookie from "react-cookies";
@@ -18,12 +19,19 @@ export default class CommentSection extends React.Component {
 
   postComment = (e) => {
     e.preventDefault();
+    if (this.state.newComment.trim().length < 0) {
+      alert("please write some comment to post!!!");
+      return;
+    }
     if (cookie.load("userId")) {
+      document.body.style.cursor = "wait";
       axios
         .post(`/comment/${this.props.pid}`, {
           comment: this.state.newComment,
         })
         .then((res) => {
+          document.body.style.cursor = "";
+          this.props.setCommentCount();
           this.setState((prevState) => {
             return { comments: [res.data, ...prevState.comments] };
           });
@@ -37,6 +45,10 @@ export default class CommentSection extends React.Component {
     });
   };
 
+  navigateUser = (e) => {
+    navigate(`/u/${e.target.innerText}`);
+  };
+
   render() {
     return (
       <div style={postStyle.commentSection}>
@@ -44,7 +56,7 @@ export default class CommentSection extends React.Component {
           {this.state.comments.map((item, index) => {
             return (
               <div key={index} index={item.cid}>
-                <b>{item.uname}</b> {item.comment}
+                <b onClick={this.navigateUser}>{item.uname}</b> {item.comment}
               </div>
             );
           })}

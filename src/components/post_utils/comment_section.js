@@ -8,7 +8,7 @@ export default class CommentSection extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
-      newComment: null,
+      newComment: "",
       comments: [],
     };
   }
@@ -33,7 +33,10 @@ export default class CommentSection extends React.Component {
           document.body.style.cursor = "";
           this.props.setCommentCount();
           this.setState((prevState) => {
-            return { comments: [res.data, ...prevState.comments] };
+            return {
+              comments: [res.data, ...prevState.comments],
+              newComment: "",
+            };
           });
         });
     } else alert("Login first to comment !!!");

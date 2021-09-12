@@ -93,7 +93,7 @@ app.get("/feed/:offset", async (req, res) => {
                         COALESCE((SELECT id FROM likes WHERE pid=p.pid AND id=$1),0) as likeflag
                         FROM posts p 
                         INNER JOIN users u ON u.id=p.id
-                        WHERE p.id IN ((SELECT followee FROM follow WHERE follower=$1),$1) 
+                        WHERE p.id IN (SELECT followee FROM follow WHERE follower=$1) OR p.id IN ($1) 
                         ORDER BY created DESC OFFSET $2 LIMIT 20;
                     `;
 

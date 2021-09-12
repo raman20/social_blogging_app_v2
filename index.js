@@ -69,6 +69,7 @@ app.get("/user/logout", (req, res) => {
   if (req.cookies["userId"]) {
     res.clearCookie("userId");
     res.clearCookie("userName");
+    res.clearCookie("userDp");
     res.end("success");
   } else {
     res.end("no_auth");

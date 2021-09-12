@@ -351,7 +351,10 @@ app.get("/user/:uname", async (req, res) => {
                         WHERE p.id=$1 
                         ORDER BY created;
                     `;
-      result = await db.query(query, [user.id]);
+      result = await db.query(query, [
+        parseInt(req.cookies["userId"]),
+        user.id,
+      ]);
       user.posts = result.rowCount > 0 ? result.rows : [];
       if (parseInt(req.cookies["userId"]) !== user.id) {
         result = await db.query(

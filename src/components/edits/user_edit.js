@@ -119,10 +119,10 @@ export default class UserEdit extends React.Component {
 
     return (
       <div className="user_edit_page">
-        <Header />
+        <Header setAuth={this.props.setAuth} />
         <div
           style={{
-            marginTop: "10px",
+            marginTop: "70px",
             display: "flex",
             flexDirection: "column",
             alignItems: "center",

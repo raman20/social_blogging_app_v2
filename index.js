@@ -4,7 +4,7 @@ const crypto = require("bcrypt");
 const cookieParser = require("cookie-parser");
 const ImageKit = require("imagekit");
 const app = express();
-const port = process.env.PORT || 3001;
+const port = process.env.PORT || 9091;
 
 const imagekit = new ImageKit({
   publicKey: "public_BA4Pcimv5MNjuSgVgorpdDADpyc=",
@@ -349,12 +349,12 @@ app.get("/user/:uname", async (req, res) => {
                         COALESCE((SELECT id FROM likes WHERE pid=p.pid AND id=$1),0) as likeflag
                         FROM posts p 
                         INNER JOIN users u ON u.id=p.id
-                        WHERE p.id=$1 
+                        WHERE p.id=$2 
                         ORDER BY created;
                     `;
       result = await db.query(query, [
         parseInt(req.cookies["userId"]),
-        user.id,
+        user.id
       ]);
       user.posts = result.rowCount > 0 ? result.rows : [];
       if (parseInt(req.cookies["userId"]) !== user.id) {
@@ -433,6 +433,17 @@ app.get("/post/content/:pid", async (req, res) => {
 app.get("/imagekit_auth", (req, res) => {
   if (req.cookies["userId"]) res.json(imagekit.getAuthenticationParameters());
   else res.end("auth_error");
+});
+
+app.get("/user/raw_search/:input", async (req, res) => {
+  if (req.cookies["userId"]) {
+    let { input } = req.params;
+    let result = await db.query(
+      "SELECT id, uname, dp FROM users WHERE uname LIKE $1 or fname LIKE $1;",
+      ["%" + input + "%"]
+    );
+    res.json(result.rows);
+  } else res.end("auth_error");
 });
 
 app.use("*", (req, res) => {

@@ -25,13 +25,13 @@ export default class MainPost extends React.Component {
     }
     return (
       <div className="main_post_page">
-        <Header />
+        <Header setAuth={this.props.setAuth} />
         <div
           style={{
             display: "flex",
             flexDirection: "column",
             alignItems: "center",
-            marginTop: "30px",
+            marginTop: "70px",
           }}
         >
           <Post postData={this.state.postData} isMainPost={true} />

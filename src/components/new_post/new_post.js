@@ -92,10 +92,10 @@ export default class NewPost extends React.Component {
 
     return (
       <div className="new_post_page">
-        <Header />
+        <Header setAuth={this.props.setAuth}/>
         <div
           style={{
-            marginTop: "10px",
+            marginTop: "70px",
             display: "flex",
             flexDirection: "column",
             alignItems: "center",

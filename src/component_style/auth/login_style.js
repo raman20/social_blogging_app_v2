@@ -1,3 +1,4 @@
+let [margin, marginTop] = window.screen.width > 600 ? ["30px", "10px"] : ["0px", "30px"];
 let loginStyle = {
   mainStyle: {
     backgroundColor: "#ffffff",
@@ -5,9 +6,9 @@ let loginStyle = {
     display: "flex",
     flexDirection: "column",
     alignItems: "center",
-    marginLeft: "30%",
-    marginRight: "30%",
-    marginTop: "10%",
+    marginLeft: margin,
+    marginRight: margin,
+    marginTop: marginTop,
     height: "55vh",
   },
   loginForm: {

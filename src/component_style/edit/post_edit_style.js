@@ -1,9 +1,10 @@
+let width = window.screen.width <= 600 ? "300px": "400px";
 let postEditStyle = {
   postEdit: {
     display: "flex",
     flexDirection: "column",
     alignItems: "center",
-    width: "400px",
+    width: width,
     border: "1px solid #dbdbdb",
     borderRadius: "5px",
     padding: "20px",

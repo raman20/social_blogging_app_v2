@@ -59,8 +59,8 @@ export default class UserProfile extends React.Component {
       ) : null;
 
     return (
-      <div>
-        <Header />
+      <div style={{marginTop: "70px"}}>
+        <Header setAuth={this.props.setAuth} />
         {this.state.userData.uname === undefined ? (
           <div
             style={{

@@ -28,6 +28,7 @@ export default class Login extends React.Component {
       .then((res) => {
         document.body.style.cursor = "";
         if (res.data === "success") {
+          this.props.setAuth(1);
           navigate("/home");
         } else if (res.data === "auth_error")
           alert("User not exist!!! \ncheck your username or password");

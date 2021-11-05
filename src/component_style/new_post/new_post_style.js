@@ -1,4 +1,4 @@
-let width = window.screen.width <= 600 ? "300px": "400px";
+let [width,paddingBottom] = window.screen.width <= 600 ? ["285px","60px"]: ["400px","0px"];
 let newPostStyle = {
   newPost: {
     display: "flex",
@@ -9,6 +9,7 @@ let newPostStyle = {
     borderRadius: "5px",
     padding: "20px",
     marginTop: "10px",
+    paddingBottom: paddingBottom
   },
 
   imagePreviewDiv: {

@@ -24,7 +24,6 @@ export default class UserProfile extends React.Component {
         alert("User not found!!!");
         navigate("/home");
       } else {
-        console.log("user found");
         this.setState({ userData: res.data });
       }
     });
@@ -59,7 +58,7 @@ export default class UserProfile extends React.Component {
       ) : null;
 
     return (
-      <div style={{marginTop: "70px"}}>
+      <div>
         <Header setAuth={this.props.setAuth} />
         {this.state.userData.uname === undefined ? (
           <div

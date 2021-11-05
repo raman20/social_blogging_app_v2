@@ -1,4 +1,4 @@
-let [margin, marginTop] = window.screen.width > 600 ? ["30px", "10px"] : ["0px", "30px"];
+let [margin, marginTop] = window.screen.width > 600 ? ["30%", "10%"] : ["0px", "30%"];
 
 let registerStyle = {
   regMain: {

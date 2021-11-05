@@ -16,9 +16,7 @@ export default class Header extends React.Component {
                     </span>
                 </h3>
                 <Search />
-                {window.screen.width > 600 ? (
-                    <Nav setAuth={this.props.setAuth} />
-                ) : null}
+                {window.screen.width > 600 ? <Nav setAuth={this.props.setAuth} /> : null}
             </header>
         );
     }

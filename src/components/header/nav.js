@@ -6,7 +6,7 @@ import navStyle from "../../component_style/header/nav_style";
 
 export default class Nav extends React.Component {
     render() {
-        return this.props.auth ? getNavBar.call(this) : null;
+        return getNavBar.call(this);
     }
 }
 

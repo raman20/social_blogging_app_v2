@@ -4,7 +4,7 @@ const crypto = require("bcrypt");
 const cookieParser = require("cookie-parser");
 const ImageKit = require("imagekit");
 const app = express();
-const port = process.env.PORT || 9091;
+const port = process.env.PORT || 8081;
 
 const imagekit = new ImageKit({
   //signup on imagekit.io for your keys

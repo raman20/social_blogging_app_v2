@@ -35,7 +35,7 @@ export default class App extends React.Component {
                     <PostEdit setAuth={this.setAuth} path="/p/:pid/edit" />
                     <NewPost setAuth={this.setAuth} path="/new_post" />
                 </Router>
-                {window.screen.width <= 600 ? (
+                {window.screen.width <= 600 && this.state.auth ? (
                     <Nav auth={this.state.auth} setAuth={this.setAuth} />
                 ) : null}
             </div>

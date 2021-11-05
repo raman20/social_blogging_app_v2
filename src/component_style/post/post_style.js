@@ -92,7 +92,7 @@ let postStyle = {
     },
 
     postList: {
-        marginTop: "70px",
+        marginTop: "10px",
         display: "flex",
         flexDirection: "column",
         alignItems: "center",

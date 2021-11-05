@@ -1,10 +1,13 @@
 const { Pool } = require('pg');
 
 const conn = new Pool({
-    host: "batyr.db.elephantsql.com",
-    user: "krbrerei",
-    db: "krbrerei",
-    password: "MBi40UsOQxdaPPVTYtdoNyb8Az0HN2Zi"
+    
+    // signup on elephantsql.com for your own postgreSQL instance
+    
+    host: "***********",
+    user: "********",
+    db: "**********",
+    password: "*********************"
 })
 
 module.exports = {

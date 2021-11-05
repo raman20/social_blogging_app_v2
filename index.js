@@ -7,9 +7,10 @@ const app = express();
 const port = process.env.PORT || 9091;
 
 const imagekit = new ImageKit({
-  publicKey: "public_BA4Pcimv5MNjuSgVgorpdDADpyc=",
-  privateKey: "private_IXir/oq8QXdwsn1dyq90mHqWiwM=",
-  urlEndpoint: "https://ik.imagekit.io/2bb11e1dc25c4278b3c4/",
+  //signup on imagekit.io for your keys
+  publicKey: "**************************************",
+  privateKey: "*************************************",
+  urlEndpoint: "https://ik.imagekit.io/*************/",
 });
 
 app.use(cookieParser());

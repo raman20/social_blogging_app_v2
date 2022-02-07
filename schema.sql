@@ -54,7 +54,7 @@ CREATE TABLE comments (
 );
 
 
--- ----------------------TRIGGERS FOR UPDATING LIKE COUNTS ON POST TABLE---------------------------->
+-- ----------------------TRIGGERS FOR UPDATING COUNTS---------------------------->
 
 -- TRIGGER FOR LIKE INCREMENT -->
 
